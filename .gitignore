@@ -39,3 +39,28 @@
 
 # debug information files
 *.dwo
+
+# Build artifacts
+build/
+*.o
+*.a
+*.so
+*.exe
+*.dll
+
+# IDE-specific files
+.vscode/
+.idea/
+*.suo
+*.user
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# Log and temp files
+*.log
+*.tmp
+
+# Hardware temporary files
+*.bak

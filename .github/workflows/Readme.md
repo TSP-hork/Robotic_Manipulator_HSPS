@@ -1,0 +1,1 @@
+this file for auto load mcu and fgpv cores
