@@ -23,3 +23,7 @@ Is step up or step down supply and send it to main board on two wire VCC and GND
 * **outcontrol blade** is technologist in my system, he can be very smart or very ..khm he can be SD and just talking simple commands, or its can be computer with cam with AI who can talk with this world of any protocol, but with arm he talking on speed of electricity (i just like how its sounds).
 
 * **between FPGA and blade** While i dont forgeted, FPGA not strong enough for control blades and he need a help. For this on road from his leg to blade we need dif converter (working on RS-422) who can send his messages without noices to gate driver. This guy can control strong MOSFETs very fast and he is cheap we accept him to our team. 
+
+## 2025-08-24: the architecture of my electronics
+
+* **main date** so today i start develop my electronics, and start print mechanic. I add new directory to docs for top_sheet. i think i need develop electronics parralel work cuz develop electronics need more time for think than act. Have a good last days of summer -^-
