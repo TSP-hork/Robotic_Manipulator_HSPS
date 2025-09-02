@@ -27,3 +27,47 @@ Is step up or step down supply and send it to main board on two wire VCC and GND
 ## 2025-08-24: the architecture of my electronics
 
 * **main date** so today i start develop my electronics, and start print mechanic. I add new directory to docs for top_sheet. i think i need develop electronics parralel work cuz develop electronics need more time for think than act. Have a good last days of summer -^-
+
+## 2025-09-02: Structure update !!
+
+```
+hardware/
+├── libraries/
+│   ├── symbols/
+│   │   └── My_Symbols.SchLib
+│   ├── footprints/
+│   │   └── My_Footprints.PcbLib
+│   └── 3d_models/
+│       ├── SP3485.step
+│       └── LFE5U-45F.step
+├── projects/
+│   ├── Axis_Channel_Blade/
+│   │   ├── Axis_Channel.PrjPcb
+│   │   ├── Axis_Channel.SchDoc
+│   │   └── Axis_Channel.PcbDoc
+│   ├── Motherboard/
+│   │   ├── Motherboard.PrjPcb
+│   │   ├── ...
+│   └── Input_Board/
+│       ├── Input_Board.PrjPcb
+│       ├── ...
+├── production/
+│   ├── Axis_Channel_Blade/
+│   │   ├── rev1.0/
+│   │   │   ├── gerber/
+│   │   │   ├── bom/
+│   │   │   └── pick_and_place/
+│   │   └── rev1.1/
+│   │       ├── ...
+│   └── Motherboard/
+│       └── rev1.0/
+│           ├── ...
+└── datasheets/
+    ├── IC/
+    │   ├── LFE5U-45F.pdf
+    │   └── SN65HVD75.pdf
+    └── connectors/
+        └── Samtec_QSE_series.pdf
+```
+
+* **start develop POWER blade** With structure i start to develop blade and for today maked arhitecture of blade

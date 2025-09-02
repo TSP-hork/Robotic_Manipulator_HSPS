@@ -37,3 +37,17 @@ For a **rigidly connected, balanced (counter-rotating) dual-disc setup**, the re
 This was a scary realization, as it required making the holes in my very compact reducer significantly larger. However, the design had enough material to accommodate this. After reprinting the discs with the corrected hole diameter, the reducer works perfectly. This is a crucial finding for anyone building this type of drive.
 
 This week, I will try to develop the full Power Blade schematic. And again i write this at midnight... <Cya guys, sleep well>
+
+## 2025-09-02: Little sick but with power blade architecture!
+
+### Milestone
+Power blade architecture is DONE! The short shoulder module is printed.
+
+### Current Status
+The architecture was a little easy for me because I had been thinking about it for two weeks, so I just sat down and made it. But with printing, I am continuing my war with the 3D printer. It just stopped in the middle of the night while I slept and ruined about 90% of the print. I need to start again and buy more plastic, but the printer is far from me, so I will restart printing next weekend ":/"
+
+### Next Steps
+The next step is to totally finish the blade's schematic and start to test it in SPICE programs. In parallel, I need to pick components for the blade. And of course, printing, printing, printing....
+
+### Comment & Key Discovery
+All week I was sick, and after work, I just lay in bed and thought about how much I needed to do but couldn't. BUT on the weekend, I was fine and finished the architecture. That was a victory! -^-
