@@ -51,3 +51,18 @@ The next step is to totally finish the blade's schematic and start to test it in
 
 ### Comment & Key Discovery
 All week I was sick, and after work, I just lay in bed and thought about how much I needed to do but couldn't. BUT on the weekend, I was fine and finished the architecture. That was a victory! -^-
+
+## 2025-09-07: POWER BLADE SCHEME IS 90% DONE!!
+
+### Milestone
+Power blade scheme is 90% done. Printing new shoulder module.
+
+### Current Status
+Updated settings for 3D printer and start printing part of shoulder module again. Ears printed and i think it okay. Today i buyed shafts and other steel staff they gonna come like... 2-3 weeks... I added datasheets and file "components" for (You won't believe it :> ) components for boards and add all components for axis channel. My win today is scheme power blade done on 90% its just need to make footprints and past. Ye i needed to test power blade today in spice program but without footprints its unreal and i dont make it not proud for that..
+
+### Next Steps
+The next step is stay same test and finishing scheme and after i can make pcb.
+
+### Comment & Key Discovery
+**DAY NOT OVER WHILE I DONT LAY!** 
+Weekend again was hard cuz i have no time for help familly and no time for this robotic arm, but i sit here and now is totaly early morning i writing this and go to sleep. Printer is printing night going to over. on this week i will be study and work and free time on week is die. Have a good night guys <cya>
