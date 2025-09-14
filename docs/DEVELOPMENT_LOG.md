@@ -66,3 +66,58 @@ The next step is stay same test and finishing scheme and after i can make pcb.
 ### Comment & Key Discovery
 **DAY NOT OVER WHILE I DONT LAY!** 
 Weekend again was hard cuz i have no time for help familly and no time for this robotic arm, but i sit here and now is totaly early morning i writing this and go to sleep. Printer is printing night going to over. on this week i will be study and work and free time on week is die. Have a good night guys <cya>
+
+## 2025-09-14: Real-World Assembly & Design Evolution
+
+### Milestone
+The first full two-stage reducer prototype was assembled and tested. While encountering critical issues, the tests successfully validated the core kinematic design and led to a significantly improved and more robust architecture.
+
+### Current Status & Key Discoveries
+This weekend was dedicated to the first physical assembly of the two-stage balanced cycloidal reducer. The test was a partial success:
+
+    The Good: The core mechanism works. When assembled, all parts fit, and the kinematics are correct — the drive rotates and provides reduction. The new, longer stator pins, when press-fitted (with a hammer), provide excellent structural rigidity without interfering with the cycloidal discs' motion.
+
+    The Bad (Problems Found):
+
+        Structural Failure: The bottom wall of the main reducer shaft proved to be too thin. It cracked and crumbled under the stress of assembly (e.g., inserting an M8 nut).
+
+        Stator Pin Instability: The stator pins were not sufficiently constrained and could be dislodged, leading to mechanism failure.
+
+    The Ugly (Resource Loss): Lost two major prints (~800g of PETG and ~40 hours of print time) this past week due to a corrupted SD card file and suboptimal print settings that caused delamination. This is a painful but valuable lesson in process reliability.
+
+### Design Evolution (The Solutions)
+Based on the test results, I've developed a new, more robust design:
+
+    Motor-to-Reducer Coupling: The initial concept for the input shaft was flawed. The final design will be: a pneumatic collet fitting (with metric M6 thread) screwed into a heat-set brass insert in the 3D-printed reducer shaft. The entire assembly will be locked by a transverse pin ("the nail") secured with a retaining ring. This provides a robust, balanced, and modular interface.
+
+    Stator Assembly: The stator pin instability will be solved by:
+
+        Closing the open holes in the stator plates.
+
+        Adding an intermediate stator plate between the two stages for added support.
+
+        Increasing the contact surface area between the stators and the pins.
+
+The CAD models will be updated with these improvements next week. The only potential delay is sourcing the non-standard M6 heat-set inserts.
+
+### Next Steps & Plan Adjustment
+The initial plan to start the PCB layout this week is postponed. The unexpected but critical mechanical redesign takes priority.
+
+    This Week (Evenings): Continue with the Power Blade schematic design. The goal is to have it 100% complete by the next weekend.
+
+    Next Weekend: Finalize the mechanical redesign in CAD and begin printing the new, improved parts.
+
+    Documentation: I will update the repo with the final printer settings, add component libraries, etc.
+
+### Comment
+This was the first major "slip" in the schedule due to the demanding university timetable and unforeseen design flaws. I had planned to be working on the schematic this weekend but spent almost all of it on mechanical assembly and problem-solving. This is frustrating but also incredibly productive. The design is now an order of magnitude better.
+
+In same situations i remember this quote:
+
+    You know, the world isn't run by the laws written on paper. It's run by people. Some according to laws, others not. It depends on each individual how his world will be, what he will make of it... I dreamed of fortunes, cars, freedom, women, respect... I got it all more or less, but with it came prison, constant fear, and the blood of my comrades.
+
+    — Mafia: The City of Lost Heaven
+
+But unlike that story, **we don't give up so easily.** There is more to come and rest will be after revolution in robots :)
+
+Thanks for following along. <Cya guys!>

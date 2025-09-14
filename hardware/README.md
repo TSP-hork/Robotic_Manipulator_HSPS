@@ -71,3 +71,10 @@ hardware/
 ```
 
 * **start develop POWER blade** With structure i start to develop blade and for today maked arhitecture of blade
+
+## 2025-09-09: for future :>
+
+* **INA190** amplifier for function hot swap motors. we can change V/V using logic signals from stm. Or we can just use better ADC and place low shunt (1 M ohm) for any current ~~(max 50A)~~ but its expensive.
+
+* **Comment** : for version 1.0, I don't do hot swapping because if I don't build this robot or it doesn't work with my motors, it won't work with any motors, and it doesn't make sense anyway :/ 
+**But if it works, I'll definitely make this feature the first one.**
