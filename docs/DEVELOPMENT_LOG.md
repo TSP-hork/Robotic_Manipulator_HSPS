@@ -125,10 +125,19 @@ Thanks for following along. <Cya guys!>
 ## 2025-09-15: little steps 
 
 ### Milestone
-I Finished schematics for components everything except `ADC` and add `PRINTER.md` to docs 
+I finished schematics for components everything except `ADC` and add `PRINTER.md` to docs 
 
 ### Comment
 
 **I think for little commits on week i will be use milestones and comments, cuz i cant doing many work for my robot and u can see other information like next steps u can see upper.**
 
 For today i maked 2 scheme of components DC/DC and LDO 5V and i bought components for connect reducer shaft and motor shaft. after they come i assembly reducers and test it and i think now that will be immortal connection ~~(sounds like joke)~~ but anyway we can see it later. For other i add my config for 3d printer to `docs/guides/PRINTER.md` u can check what settings i using for printing mb its can help u :)
+
+## 2025-09-16: schematics for components are completed !!!
+
+### Milestone
+I completed scheme for STM32G4 and add all schematics to repository !!!!!
+
+### Comment
+So so so that was too long for one component but all functions for every pin from datasheet in schem and that now have footprint. 
+I change MC cuz i little mistake with price for `STM32G474CEU6` u can read about that to `hardware/docs/components.md`. time to sleep.. <Cya>

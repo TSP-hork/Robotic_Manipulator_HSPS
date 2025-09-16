@@ -12,7 +12,7 @@ In this document, I want to describe a list of components for the boards and exp
 
 * **Amplifier** : <INA240> (Cheap monster in this work. High CMRR, Zero-Drift, Wide Bandwidth and price like rice )**A1=20 V/V and +-6.75 Mohm for shunt**
 
-* **ADC** : <STM32G474CEU6> (Cheap and work like expencive ADC but also can in logic work and also rice price)
+* **ADC** : <STM32G431RBT6> (Cheap and work like expencive ADC but also can in logic work and also rice price)
 
 * **DC/DC(12V)** : <TPS54360BDDAR> (it's cheap as a bolt, but it has 60 V input and 800 mV-58 V output, and 3.5 A is just insane, no questions, we choose it)
 
@@ -26,3 +26,6 @@ In this document, I want to describe a list of components for the boards and exp
 
 **Comment**
 **2025-09-07** : Siting after midnight and very happy cuz i found good silicon rock yeeey ^^! I hope u slept in this weekend night and have a good weekend ty for reading :)
+
+**Comment**
+**2025-09-16** : I change ADC from `STM32G474CEU6` to `STM32G431RBT6` cuz second is cheapest and have same 3 parallel ADC. we anyway want just this function and strengh is not priority for that. `STM32G431RBT6` will work like 20% of max power and for `STM32G474CEU6` its mb 12-15%. But why i really change ADC is my mistake, i dont know how but i found `STM32G474CEU6` with price 2$ and now i tryed found it again and found only prices over 6$ i think google give me price for another MC (i think price for  `STM32G431RBT6` cuz it 2$) and i dont checked name for MC cuz was happy for this low price, dont repeat my mistakes recheck names for MC
