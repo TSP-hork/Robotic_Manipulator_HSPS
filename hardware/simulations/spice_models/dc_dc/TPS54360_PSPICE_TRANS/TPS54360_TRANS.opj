@@ -1,0 +1,74 @@
+(ExpressProject "TPS54360_TRANS"
+  (ProjectVersion "19981106")
+  (ProjectType "Analog or A/D Mixed Mode")
+  (Folder "Design Resources"
+    (Folder "Library"
+      (File ".\tps54360_trans.olb"
+        (Type "Schematic Library")))
+    (NoModify)
+    (File ".\tps54360_trans.dsn"
+      (Type "Schematic Design"))
+    (BuildFileAddedOrDeleted "x")
+    (CompileFileAddedOrDeleted "x")
+    (PSPICE_Regenerate_Netlist_Flag "FALSE")
+    (RootChangedForceReNetlist "x"))
+  (Folder "Outputs")
+  (Folder "PSpice Resources"
+    (Folder "Simulation Profiles"
+      (File.PSpice.{09528990-3187-11D2-BC7B-00A0C90CBF91}
+         ".\tps54360_trans-pspicefiles\startup\trans.sim"
+        (DisplayName "Startup-trans")
+        (Type "PSpice Profile"))
+      (File.PSpice.{09528990-3187-11D2-BC7B-00A0C90CBF91}
+         ".\tps54360_trans-pspicefiles\steadystate\trans.sim"
+        (DisplayName "SteadyState-trans")
+        (Type "PSpice Profile"))
+      (ActiveProfile ".\tps54360_trans-pspicefiles\startup\trans.sim"))
+    (Folder "Model Libraries"
+      (Sort User)
+      (File ".\tps54360_trans.lib"
+        (Type "PSpiceLibrary")))
+    (Folder "Stimulus Files"
+      (Sort User))
+    (Folder "Include Files"
+      (Sort User)))
+  (DefaultLibraryBrowseDirectory "library\PSpice")
+  (MPSSessionName "x0208478")
+  (GlobalState
+    (FileView
+      (Path "Design Resources"))
+    (HierarchyView)
+    (Doc
+      (Type "COrCapturePMDoc")
+      (Frame
+        (Placement "44 0 1 0 625 -4 -23 -14 264 3 427"))
+      (Tab 0)))
+  (PartMRUSelector
+    (IC1
+      (FullPartName "IC1.Normal")
+      (LibraryName
+         "C:\CADENCE\SPB_16.2\TOOLS\CAPTURE\LIBRARY\PSPICE\SPECIAL.OLB")
+      (DeviceIndex "0"))
+    (IDC
+      (FullPartName "IDC.Normal")
+      (LibraryName
+         "C:\CADENCE\SPB_16.2\TOOLS\CAPTURE\LIBRARY\PSPICE\SOURCE.OLB")
+      (DeviceIndex "0"))
+    (TPS54360_TRANS
+      (FullPartName "TPS54360_TRANS.Normal")
+      (LibraryName
+         "C:\ELABTRANS_WS\ELABTRANS_DS\PART_NUMBERS\TPS54360\ACTIVE_WORK_SANKALP\EXPERIMENTS\RELEASE\TPS54360_PSPICE_TRANS\TPS54360_TRANS.OLB")
+      (DeviceIndex "0"))
+    (VDC
+      (FullPartName "VDC.Normal")
+      (LibraryName
+         "C:\CADENCE\SPB_16.2\TOOLS\CAPTURE\LIBRARY\PSPICE\SOURCE.OLB")
+      (DeviceIndex "0"))
+    (0
+      (LibraryName "C:\CADENCE\SPB_16.0\TOOLS\CAPTURE\LIBRARY\CAPSYM.OLB")
+      (DeviceIndex "0"))
+    (TPS54360DDA_TRANS
+      (FullPartName "TPS54360DDA_TRANS.Normal")
+      (LibraryName
+         "C:\ELABTRANS_WS\ELABTRANS_DS\PART_NUMBERS\TPS54360\ACTIVE_WORK_SANKALP\EXPERIMENTS\RELEASE\TPS54360_PSPICE_TRANS\TPS54360_TRANS.OLB")
+      (DeviceIndex "0"))))

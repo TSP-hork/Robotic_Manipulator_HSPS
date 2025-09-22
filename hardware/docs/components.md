@@ -10,7 +10,7 @@ In this document, I want to describe a list of components for the boards and exp
 
 * **Gate-drivers** : <UCC27201ADDA> (Its fast,cheap and work with 3.3 logic we need this anyway)**Half-Bridge,Vmax:20V,Ipeak:3A**
 
-* **Amplifier** : <INA240> (Cheap monster in this work. High CMRR, Zero-Drift, Wide Bandwidth and price like rice )**A1=20 V/V and +-6.75 Mohm for shunt**
+* **Amplifier** : <INA240> (Cheap monster in this work. High CMRR, Zero-Drift, Wide Bandwidth and price like rice )**A1=20 V/V and +-6.75 mohm for shunt**
 
 * **ADC** : <STM32G431RBT6> (Cheap and work like expencive ADC but also can in logic work and also rice price)
 
@@ -29,3 +29,7 @@ In this document, I want to describe a list of components for the boards and exp
 
 **Comment**
 **2025-09-16** : I change ADC from `STM32G474CEU6` to `STM32G431RBT6` cuz second is cheapest and have same 3 parallel ADC. we anyway want just this function and strengh is not priority for that. `STM32G431RBT6` will work like 20% of max power and for `STM32G474CEU6` its mb 12-15%. But why i really change ADC is my mistake, i dont know how but i found `STM32G474CEU6` with price 2$ and now i tryed found it again and found only prices over 6$ i think google give me price for another MC (i think price for  `STM32G431RBT6` cuz it 2$) and i dont checked name for MC cuz was happy for this low price, dont repeat my mistakes recheck names for MC
+
+# 22.09.2025 "components for MOTHERboard"
+
+* **slot for blade** : `10018783-10201TLF` (just cuz it cheapest fastest and just can be bough.  rly i spent 4 hours for just found any solution and use `PCI` is only what i can :/ )

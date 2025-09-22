@@ -1,0 +1,32 @@
+Version 4
+SymbolType BLOCK
+RECTANGLE Normal -64 -72 64 72
+WINDOW 0 0 -72 Bottom 2
+SYMATTR Prefix X
+SYMATTR Value UCC27201_TRANS
+SYMATTR ModelFile C:\Users\Ян\Documents\GitHub\Robotic_Manipulator_HSPS\hardware\simulations\spice\gate_driver\UCC27201ADDA\UCC27201_TRANS.LIB
+WINDOW 3 0 72 Top 2
+PIN -64 -48 LEFT 8
+PINATTR PinName HI
+PINATTR SpiceOrder 1
+PIN -64 -16 LEFT 8
+PINATTR PinName VDD
+PINATTR SpiceOrder 2
+PIN -64 16 LEFT 8
+PINATTR PinName LI
+PINATTR SpiceOrder 3
+PIN -64 48 LEFT 8
+PINATTR PinName HB
+PINATTR SpiceOrder 4
+PIN 64 -48 RIGHT 8
+PINATTR PinName HO
+PINATTR SpiceOrder 5
+PIN 64 -16 RIGHT 8
+PINATTR PinName HS
+PINATTR SpiceOrder 6
+PIN 64 16 RIGHT 8
+PINATTR PinName LO
+PINATTR SpiceOrder 7
+PIN 64 48 RIGHT 8
+PINATTR PinName VSS
+PINATTR SpiceOrder 8

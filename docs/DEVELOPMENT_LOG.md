@@ -141,3 +141,17 @@ I completed scheme for STM32G4 and add all schematics to repository !!!!!
 ### Comment
 So so so that was too long for one component but all functions for every pin from datasheet in schem and that now have footprint. 
 I change MC cuz i little mistake with price for `STM32G474CEU6` u can read about that to `hardware/docs/components.md`. time to sleep.. <Cya>
+
+# 2025-09-23: Principle scheme is complete!
+
+## Milestone
+Completed the schematic; simulations and printing are underway
+
+## Current Status
+I completed the schematic, started printing the second part of the shoulder module, and successfully assembled the shoulder module on the shaft. I also started the simulation using the INA240 in LTspice
+
+## Next Steps
+Finish simulations and start PCB design and create a Telegram channel
+
+## Comment
+This weekend was tough: I started around 9:00 PM and worked until about 4:30 AM on Saturday and 5:00 AM on Sunday. On Monday I worked and fixed the schematic — the pin headers for the joke turned out to be harder than 60% of the circuit design. I spent 4 hours figuring out how to use PCI — it's just a connector I can use for the board. Before that I considered a mezzanine connector but couldn't find one compatible with my board that didn't cost almost as much as the whole board with all components. Now we're using PCI at a reasonable price. During the week I will create a Telegram channel to document activity like videos and fails, since using Git for that is inconvenient; I'll be there all week.
