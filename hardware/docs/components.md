@@ -12,6 +12,8 @@ In this document, I want to describe a list of components for the boards and exp
 
 * **Amplifier** : <INA240> (Cheap monster in this work. High CMRR, Zero-Drift, Wide Bandwidth and price like rice )**A1=20 V/V and +-6.75 mohm for shunt**
 
+* **Shunt** : <WSLP25125L000FEA> (just `3W` just `cheap` just `1%` just 5mohm )
+
 * **ADC** : <STM32G431RBT6> (Cheap and work like expencive ADC but also can in logic work and also rice price)
 
 * **DC/DC(12V)** : <TPS54360BDDAR> (it's cheap as a bolt, but it has 60 V input and 800 mV-58 V output, and 3.5 A is just insane, no questions, we choose it)
@@ -33,3 +35,6 @@ In this document, I want to describe a list of components for the boards and exp
 # 22.09.2025 "components for MOTHERboard"
 
 * **slot for blade** : `10018783-10201TLF` (just cuz it cheapest fastest and just can be bough.  rly i spent 4 hours for just found any solution and use `PCI` is only what i can :/ )
+
+**comment**
+**25.09.25** : 64 pins is not enough i think i will pick PCI with 80+ but change schematic later sry

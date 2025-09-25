@@ -155,3 +155,14 @@ Finish simulations and start PCB design and create a Telegram channel
 
 ## Comment
 This weekend was tough: I started around 9:00 PM and worked until about 4:30 AM on Saturday and 5:00 AM on Sunday. On Monday I worked and fixed the schematic — the pin headers for the joke turned out to be harder than 60% of the circuit design. I spent 4 hours figuring out how to use PCI — it's just a connector I can use for the board. Before that I considered a mezzanine connector but couldn't find one compatible with my board that didn't cost almost as much as the whole board with all components. Now we're using PCI at a reasonable price. During the week I will create a Telegram channel to document activity like videos and fails, since using Git for that is inconvenient; I'll be there all week.
+
+# 2025-09-23: Simulation INA240 are complete!!!!
+
+### Milestone
+* Add all spice schematics for axis channel blade
+* Create directory `simulatons` 
+* Made 4 simulations for `INA240` amplifier.
+* Made telegram channel 
+
+### Comment
+All week i working and afer work i just lay and its all what i did and that will be true if i was a just good worker who woudnt sleep tomorrow, for that after work maked simulations and learn LTspice...khm.. i working in this program before but with simple simulations and now i tryed be serios so today we have complete simulation for first component! <Good night~>
