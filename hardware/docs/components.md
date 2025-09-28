@@ -24,7 +24,7 @@ In this document, I want to describe a list of components for the boards and exp
 
 * **N-MOSFET** : <NTMFS3D5N08XT1G> (Its fastest mosfet what i can found and its pretty cheap with good cool body just ideal) **QG=23 nC !!!!** **80V,3mOhms** 
 
-* **N-MOSFET** : <BSC030N08NS5> (Just good and cheap but not fastest if u want u can use it u wellcome)**QG=73nC,80V,3mOhms**
+* **N-MOSFET(similar)** : <BSC030N08NS5> (Just good and cheap but not fastest if u want u can use it u wellcome)**QG=73nC,80V,3mOhms**
 
 **Comment**
 **2025-09-07** : Siting after midnight and very happy cuz i found good silicon rock yeeey ^^! I hope u slept in this weekend night and have a good weekend ty for reading :)
@@ -38,3 +38,6 @@ In this document, I want to describe a list of components for the boards and exp
 
 **comment**
 **25.09.25** : 64 pins is not enough i think i will pick PCI with 80+ but change schematic later sry
+
+**comment**
+**28.09.25** : We will use spice model from TI for similar MOSFET cuz they have same characteristics 

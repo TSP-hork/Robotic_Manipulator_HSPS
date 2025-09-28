@@ -4,7 +4,7 @@ RECTANGLE Normal -64 -72 64 72
 WINDOW 0 0 -72 Bottom 2
 SYMATTR Prefix X
 SYMATTR Value UCC27201_TRANS
-SYMATTR ModelFile C:\Users\Ян\Documents\GitHub\Robotic_Manipulator_HSPS\hardware\simulations\spice\gate_driver\UCC27201ADDA\UCC27201_TRANS.LIB
+SYMATTR ModelFile C:\GitHub\Robotic_Manipulator_HSPS\hardware\simulations\spice_models\gate_driver\UCC27201ADDA\UCC27201_TRANS.LIB
 WINDOW 3 0 72 Top 2
 PIN -64 -48 LEFT 8
 PINATTR PinName HI

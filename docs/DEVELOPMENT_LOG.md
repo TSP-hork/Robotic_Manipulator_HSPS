@@ -166,3 +166,29 @@ This weekend was tough: I started around 9:00 PM and worked until about 4:30 AM 
 
 ### Comment
 All week i working and afer work i just lay and its all what i did and that will be true if i was a just good worker who woudnt sleep tomorrow, for that after work maked simulations and learn LTspice...khm.. i working in this program before but with simple simulations and now i tryed be serios so today we have complete simulation for first component! <Good night~>
+
+# 2025-09-28: ALL SIMULATIONS COMPLETE. STARTING PCB!!!!
+
+## Milestone
+Completed all simulations and the final schematic for the Axis Channel. Remodeled the head of the shoulder module and the shaft for the 10:1 reducer.
+
+## Current Status
+- **Simulations:** Successfully completed and verified the DC/DC, Current Amplifier, and Half-Bridge circuits.
+- **Documentation:** Created a guide on how to import SPICE models.
+- **CAD:** Remodeled the shoulder modules and the reducer shaft. Started printing the main shoulder part.
+
+## Next Steps
+- **Start the PCB layout** for the Axis Channel blade.
+- **Finish** the CAD models for the reducer and shoulder assembly.
+
+## Comment
+
+I thought the simulations would be the easy part - just load models and run. The DC/DC simulation, on the other hand, was done in 30 minutes. The half-bridge, however, took an entire day just to get it to work at all.
+
+In the end, I got the basic simulation running and saw the square waves, which is a success. Honestly, I hoped to simulate a real "hell" scenario for it with all the parasitics and protections, but that's a project in itself, and I just don't have that much time to spend only on simulations.
+
+So I made a pragmatic engineering decision: I based the final schematic on proven reference designs from datasheets and application notes, using LTspice just for a basic "does it switch?" sanity check, without the deep, "hard tests". It's a calculated risk, but a necessary one to move forward.
+
+Now, I continue my war with the reducer models. It needs so many iterations of printing parts, which is not easy when I can only print 2 days a week. I spent most of this weekend just modeling because I messed up the sizes for the main shaft bearing... I don't know how it happened, but it is what it is.
+
+So, time is again not on my side. Looks like another night of 4 hours of sleep... Thanks for your attention, have good dreams :)
