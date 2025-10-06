@@ -34,10 +34,12 @@ In this document, I want to describe a list of components for the boards and exp
 
 # 22.09.2025 "components for MOTHERboard"
 
-* **slot for blade** : `10018783-10201TLF` (just cuz it cheapest fastest and just can be bough.  rly i spent 4 hours for just found any solution and use `PCI` is only what i can :/ )
+~~* **slot for blade** : `10018783-10201TLF` (just cuz it cheapest fastest and just can be bough.  rly i spent 4 hours for just found any solution and use `PCI` is only what i can :/ )~~
 
 **comment**
 **25.09.25** : 64 pins is not enough i think i will pick PCI with 80+ but change schematic later sry
 
 **comment**
 **28.09.25** : We will use spice model from TI for similar MOSFET cuz they have same characteristics 
+
+* **slot for blade** : `10018784-10202TLF` 98 pos PCI 

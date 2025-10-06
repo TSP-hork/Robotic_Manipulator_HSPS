@@ -192,3 +192,29 @@ So I made a pragmatic engineering decision: I based the final schematic on prove
 Now, I continue my war with the reducer models. It needs so many iterations of printing parts, which is not easy when I can only print 2 days a week. I spent most of this weekend just modeling because I messed up the sizes for the main shaft bearing... I don't know how it happened, but it is what it is.
 
 So, time is again not on my side. Looks like another night of 4 hours of sleep... Thanks for your attention, have good dreams :)
+
+# 2025-10-06: SCHEMATICS ARE DONE. PCB HELL BEGINS.
+
+## Milestone
+* Started printing the lower part of the long shoulder module.
+* Configuration of Altium for starting the PCB is over.
+* Created all remaining components for the Axis Channel blade with their footprints.
+* Imported all components into the PCB project.
+
+## Current Status
+- **Schematics:** Replaced all default Altium components with my own custom ones.
+- **Libraries:** Built a complete library with every single component for the Axis Channel blade.
+- **PCB:** The PCB file is created. The board outline is set to 100x100mm. The layer stack is defined. All components have been imported.
+
+## Next Steps
+- **PCB:** FINALLY START IT!!!!!
+- **CAD:** Continue printing and assembling parts.
+- **LTspice:** Run one or two more simulations for the LDOs.
+
+## Comment
+
+It's 3:40 AM on a Monday morning.... **[dying sounds]**
+
+That was insane, really. So many hours creating footprints, hunting for datasheets, and fighting with Altium settings. But it's finally over. We are starting a new part of this strange story!
+
+**AND for now!!!** <Have a good night, guys :)>
