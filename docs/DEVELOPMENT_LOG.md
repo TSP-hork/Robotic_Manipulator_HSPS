@@ -218,3 +218,35 @@ It's 3:40 AM on a Monday morning.... **[dying sounds]**
 That was insane, really. So many hours creating footprints, hunting for datasheets, and fighting with Altium settings. But it's finally over. We are starting a new part of this strange story!
 
 **AND for now!!!** <Have a good night, guys :)>
+
+## 2025-10-13: PCB Hell might not BEGIN, but it could start this week...
+
+### Milestone
+* Finished printing the long lower part of the shoulder module.
+* <I use Arch btw>...
+* Completed simulations for the 12V, 8V, and 5V DC/DC converters.
+* Corrected the DC/DC schematics in Altium and validated them in LTspice.
+
+### Current Status
+- **Printing:** The lower part of the shoulder module is done. The new support settings are working well.
+- **LTspice:** Finished the DC/DC simulations and found a major problem in my original schematic. I'm not sure how it even worked before, but it's correct now. In short, I had issues with the feedback and COMP circuitry. It's fixed now.
+- **Altium:** Corrected the Axis Channels chematic. I will start the PCB layout this week.
+- **Arch:** Installed Arch Linux on my new laptop. I'll be using it for all STM programming and other development.
+
+### Next Steps
+- **PCB:** FINALLY START THE LAYOUT! ~~(This time for sure...)~~
+- **CAD:** Print the upper part of the shoulder module.
+- **Arch:** Finish configuring the development environment.
+
+### Comment
+This weekend was just tr... khm...
+
+I forgot my laptop charger in another city, so the entire weekend was lost, and I literally did nothing. However, on Saturday, I received my new laptop ~~(a ThinkPad, running Arch btw)~~ which was the only good news.
+
+I spent all of Saturday evening and all of Sunday installing Arch(~~on a ThinkPad, btw~~) and just finished it today.
+
+Now I have the proper tool for thepost-PCBsteps. Today, I managed to fix the schematics and finalize the DC/DC simulations.
+
+That was just some bad luck, and I hope it's the last bad weekend for a while ~~(nope)~~.
+
+Thanks for your attention, <have a good night!> :)

@@ -26,6 +26,11 @@ In this document, I want to describe a list of components for the boards and exp
 
 * **N-MOSFET(similar)** : <BSC030N08NS5> (Just good and cheap but not fastest if u want u can use it u wellcome)**QG=73nC,80V,3mOhms**
 
+* **inductors for DC/DC** : 
+    * <NPIM74C4R7MTRF> 4.7uH 5.5A <0.8$>
+    * <IHLP2020CZER4R7M11> 4.7 uH 4.5A <0,7$>
+    
+
 **Comment**
 **2025-09-07** : Siting after midnight and very happy cuz i found good silicon rock yeeey ^^! I hope u slept in this weekend night and have a good weekend ty for reading :)
 
