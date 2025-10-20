@@ -250,3 +250,31 @@ Now I have the proper tool for thepost-PCBsteps. Today, I managed to fix the sch
 That was just some bad luck, and I hope it's the last bad weekend for a while ~~(nope)~~.
 
 Thanks for your attention, <have a good night!> :)
+
+# 2025-10-20: WE ARE BACK! 55% OF THE DRIVER IS DONE.
+
+## Milestone
+* Started printing the long upper part of the shoulder module.
+* Completed the placement of all main power components (half-bridges, amplifiers, gate drivers).
+
+## Current Status
+- **Printing:** I've started printing the upper part of the shoulder module after making fixes to the CAD model.
+- **Altium:** The Axis Channel schematic is fully corrected. This week, I'm diving deep into the PCB layout.
+
+## Next Steps
+- **PCB:** Finish component placement and begin the routing phase.
+- **CAD:** Test assemble the long shoulder module and buy the 10mm shafts.
+
+## Comment
+
+This was just a very good weekend, and I can't comment on that any other way.
+
+Everything I wanted to do, I did!
+
+I spent all night on the placement of the MOSFETs, and along with them, I placed the amplifiers and gate drivers. And that's just... finally, it's done!!
+
+`Just start the task.`
+        `Just finish the task.`
+                `That's how I will build this robot!`
+
+<Have a good night, guys :)>
