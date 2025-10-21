@@ -278,3 +278,11 @@ I spent all night on the placement of the MOSFETs, and along with them, I placed
                 `That's how I will build this robot!`
 
 <Have a good night, guys :)>
+
+# 2025-10-21: Little Refactor
+
+## Milestone
+* Refactored the entire placement of the main power stage components. The primary goal was to drastically shorten the path from the gate drivers to the MOSFET gates.
+
+## Comment
+Before this refactoring, the trace length to the upper MOSFET's gate was around `~10mm`. After a complete re-layout of the power core, the new path is now only **`1.5mm - 1.8mm`**. This is a massive improvement that will significantly reduce gate loop inductance, leading to faster, cleaner switching and lower thermal losses.
