@@ -286,3 +286,29 @@ I spent all night on the placement of the MOSFETs, and along with them, I placed
 
 ## Comment
 Before this refactoring, the trace length to the upper MOSFET's gate was around `~10mm`. After a complete re-layout of the power core, the new path is now only **`1.5mm - 1.8mm`**. This is a massive improvement that will significantly reduce gate loop inductance, leading to faster, cleaner switching and lower thermal losses.
+
+# 2025-10-27: Placing is Over
+
+## Milestone
+* Finished placing the RS-485 receivers, the MCU-ADC, and the 5V DC/DC converter.
+* Started printing the long upper part of the shoulder module... again...
+* Tested new hole sizes for the pins in the 10:1 reducer.
+* Dialed in new settings for Orca Slicer.
+
+## Current Status
+- **PCB:** I've finished placing 90% of the components. The last 10% are the two remaining DC/DC converters.
+- **Printing:** This weekend's main theme. I broke the upper part of the shoulder module while trying to fit a bearing. After that, I changed my settings and printed a new stator, shaft, and outer flange. Then I started printing the upper part of the long shoulder module again. And, to top it off, I broke the lower part of the short module during assembly. It was a bad print from the start and was just defective all this time.
+
+## Next Steps
+- **PCB:** Finish component placement and begin the routing phase. ~~(Still same)~~
+- **CAD:** Test assemble the long shoulder module and buy the 10mm shafts.
+
+## Comment
+
+Just an insane weekend. I finally finished the majority of the placement, and I think the routing will be easy because all the components are placed very close together, allowing me to use copper pours for many connections.
+
+I broke TWO parts this weekend... AAAA... *khm*. But now I know that one of them was trash from the beginning, and the second one *can* fit the bearing, but only if you don't use a hammer...
+
+A very good weekend. I hope the same for you :)
+
+<Have a good night, sleep well guys>
