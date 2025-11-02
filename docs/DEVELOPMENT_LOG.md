@@ -312,3 +312,14 @@ I broke TWO parts this weekend... AAAA... *khm*. But now I know that one of them
 A very good weekend. I hope the same for you :)
 
 <Have a good night, sleep well guys>
+
+# 2025-11-03: Little Necessary Work
+
+## Milestone
+*   Finished component placement for the Axis Channel blade.
+*   Finished printing the long upper part of the shoulder module.
+
+## Comment
+Just some necessary work is done. Tomorrow, the plan is to finish the reducer assembly, start the PCB routing, and begin printing the lower part of the short shoulder module.
+
+And now... <have a good night~>
