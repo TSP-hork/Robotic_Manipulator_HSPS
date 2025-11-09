@@ -323,3 +323,27 @@ A very good weekend. I hope the same for you :)
 Just some necessary work is done. Tomorrow, the plan is to finish the reducer assembly, start the PCB routing, and begin printing the lower part of the short shoulder module.
 
 And now... <have a good night~>
+
+# 2025-11-09: FINALLY, LAYOUT!
+
+## Milestone
+*   Replaced the MCU and its supporting components on the layout.
+*   Completed the initial routing for the entire Top Layer of the Axis Channel blade (~50% of total routing).
+
+## Current Status
+- **PCB:** Literally what I said above, haha.
+- **Printing:** The new head for the long shoulder module broke because the layers didn't merge properly. When I tried to press-fit a bearing (gently, really!), it just went *CRRRRR* and... *khm*. Anyway, I'll be reprinting this part (this will be the third try).
+
+## Next Steps
+- **PCB:** Finish routing!
+- **CAD:** Print the head of the long shoulder module *again*, and finally `buy the 10mm shafts`.
+
+## Comment
+
+Phew... it's 4 AM again, and I'm sitting here, trying to make little steps to create this thing. I was a little sad when the shoulder module part just broke again, but then I tried pressing a bearing into the second hole, and it didn't break! It even held up while I was pressing it in, which gives me hope :).
+
+I've also made a decision: first, I'll finish the routing, and *second*, I'll place the PCIe connector on the schematic. I need to understand where the routes can connect to the PCIe connector most efficiently to create the shortest paths, and only then will I finalize the connections on the main schematic.
+
+After the part broke, I just took a hammer and smashed it to see how good the infill was. And honestly, it wasn't bad. Of course, it could be better, but it's a really solid plastic part. When I hit it, it just deformed, and only after about 10 hits did it shatter into small pieces. Yeah, some walls looked like they weren't solid, but maybe that's just the limit of 3D printing, because when I hit it, it reacted like a solid part.
+
+So, yeah... I think it's time to sleep. <Have cool dreams~>
