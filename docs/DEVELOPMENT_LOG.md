@@ -347,3 +347,11 @@ I've also made a decision: first, I'll finish the routing, and *second*, I'll pl
 After the part broke, I just took a hammer and smashed it to see how good the infill was. And honestly, it wasn't bad. Of course, it could be better, but it's a really solid plastic part. When I hit it, it just deformed, and only after about 10 hits did it shatter into small pieces. Yeah, some walls looked like they weren't solid, but maybe that's just the limit of 3D printing, because when I hit it, it reacted like a solid part.
 
 So, yeah... I think it's time to sleep. <Have cool dreams~>
+
+# 2025-11-10: Updated settings for Orca
+
+## Current Status
+- **Orca slicer** updated orca slicer settings
+
+## Comment
+U know what ?? `updated orca slicer settings!!` ~~(insane right?)~~

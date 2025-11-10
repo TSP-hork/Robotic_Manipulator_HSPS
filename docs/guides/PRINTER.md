@@ -38,17 +38,17 @@ To replicate the setup, create a new set of profiles and input the following par
 
 #### Extruder 1 Tab:
 *   **Retraction -> Length:** `0.8 mm`
-*   **Retraction -> Retraction Speed:** `40 mm/s`
-*   **Z Hop -> Z hop when retracting:** `0.2 mm`
+*   **Retraction -> Retraction Speed:** `35 mm/s`
+*   **Z Hop -> Z hop when retracting:** `0.3 mm`
 *   **Z Hop -> Z hop type:** `Spiral`
 
 ### 4.2. Filament Profile (`PETG1`)
 
 #### Filament Tab:
-*   **Flow Ratio:** `0.96` (or your calibrated value, `1.05` for extra strength)
+*   **Flow Ratio:** `0.96` (or your calibrated value)
 *   **Pressure advance (PA):** `0.05` (or your calibrated value)
 *   **Temperature -> Nozzle -> First layer:** `250 °C`
-*   **Temperature -> Nozzle -> Other layers:** `240 °C`
+*   **Temperature -> Nozzle -> Other layers:** `245 °C`
 *   **Temperature -> Bed -> First layer:** `85 °C`
 *   **Temperature -> Bed -> Other layers:** `75 °C`
 *   **Max volumetric speed:** `9 mm³/s`
@@ -60,7 +60,7 @@ To replicate the setup, create a new set of profiles and input the following par
 *   **Slow down for better layer cooling:** `Enabled`
     *   **Slow down if layer print time is below:** `15 s`
     *   **Min print speed:** `20 mm/s`
-*   **Overhang Fan Speed -> Fan speed for overhangs:** `60 %`
+*   **Overhang Fan Speed -> Fan speed for overhangs:** `40 %`
 
 ### 4.3. Process Profile (`PETG_STRENGTH`)
 
@@ -72,10 +72,10 @@ To replicate the setup, create a new set of profiles and input the following par
 *   **Extrusion width -> Infill:** `0.45 mm`
 *   **Seam -> Seam position:** `Random`
 *   **Wall generator:** `Arachne`
-*   **Wall generator -> Wall transition threshold angle:** `59 °` (just max cuz that help fill 100%)
+*   **Wall generator -> Wall transition threshold angle:** `50 °` 
 *   **Wall generator -> Number of wall transitions:** `4` or `5`
 *   **Wall generator -> Minimal perimeter width:** `25 %`
-*   **Perimeters -> Wall sequence:** `Inner/Outer`
+*   **Perimeters -> Wall sequence:** `Inner/Outer/Inner`
 
 #### Strength Tab:
 *   **Wall loops:** `5`
@@ -87,11 +87,34 @@ To replicate the setup, create a new set of profiles and input the following par
 *   **Infill after perimeters:** `Disabled` 
 
 #### Speed Tab:
+
+*   **First layer:** `20 mm/s`
+*   **First layer infill:** `20 mm/s`
+*   **Initial layer travel speed:** `50 mm/s`
+*   **Number of slow layers:** `3`
+
 *   **Outer wall:** `35 mm/s`
 *   **Inner wall:** `45 mm/s`
 *   **Sparse infill:** `50 mm/s`
-*   **Initial layer:** `20 mm/s`
-*   **Initial layer infill:** `20 mm/s`
-*   **Number of slow layers:** `3`
+*   **Internal solid infill:** `50 mm/s`
+*   **Support interface:** `50 mm/s`
+*   **Bridge(E|I):** `30 mm/s`
+
+*   **Travel:** `50 mm/s`
+
+#### Support:
+
+*   **Enable support:** `+`
+*   **Type:** `Tree(auto)`
+*   **Style:** `Organic`
+
+
+*   **Top Z distance:** `0.225 mm`
+*   **Bottom Z distance:** `0.225 mm`
+*   **Base pattern:** `Lightning`
+*   **Base pattern spacing:** `1 mm`
+
+*   **Tree support branch diameter:** `7 mm`
+
 
 ---
