@@ -355,3 +355,26 @@ So, yeah... I think it's time to sleep. <Have cool dreams~>
 
 ## Comment
 U know what ?? `updated orca slicer settings!!` ~~(insane right?)~~
+
+# 2025-11-16: Little Steps in Layout
+
+## Milestone
+*   Successfully assembled the head-shoulder module.
+*   Learned all about vias. 
+*   Made the layout for the GND and PWR planes.
+*   Finally bought the 10mm shafts.
+
+## Current Status
+- **PCB:** I spent the entire day trying to figure out how to properly place vias for the GND and PWR planes, but now I finally know how to do it. And now, I need to go to sleep :(
+- **Printing:** Finally pressed the bearings in without breaking the part! Now starting to print the base.
+
+## Next Steps
+- **PCB:** Finish routing the bottom side!
+- **CAD:** Print the base.
+
+## Comment
+This weekend felt very short. I had to visit a lesson at the university this week, which is in another city, and by the time I got back, a day was gone.
+
+So I only had one real day, and I spent all of it just understanding how to place vias correctly. For now, I need to go to sleep, but at least I know how to do it. I think the actual work of placing them will be pretty simple and fast now.
+
+<have a good night guys ~>
