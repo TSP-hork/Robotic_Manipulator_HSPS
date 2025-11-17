@@ -378,3 +378,14 @@ This weekend felt very short. I had to visit a lesson at the university this wee
 So I only had one real day, and I spent all of it just understanding how to place vias correctly. For now, I need to go to sleep, but at least I know how to do it. I think the actual work of placing them will be pretty simple and fast now.
 
 <have a good night guys ~>
+
+# 2025-11-18: THE BEAST HAS A NERVOUS SYSTEM
+
+## Milestone
+* All signal paths are now routed.
+* The "quiet" side of the board is essentially complete.
+
+## Comment
+I like how it's going. I think we can do it.
+
+<Have a good night, guys. We're almost there.>
