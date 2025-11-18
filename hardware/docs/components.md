@@ -18,7 +18,10 @@ In this document, I want to describe a list of components for the boards and exp
 
 * **DC/DC(12V)** : <TPS54360BDDAR> (it's cheap as a bolt, but it has 60 V input and 800 mV-58 V output, and 3.5 A is just insane, no questions, we choose it)
 
-* **LDO(3.3V)** : <LM1117-3.3> (no comments for legend)
+* **LDO(3.3V)** : <TLV1117-33IDCYR> it's can work with ceramic capasitors and have better characteristics then lm1117. And it's pretty cheap. 
+
+* <LM1117-3.3> (no comments for legend) 
+**updated: 2025-11-18** BUT LEGEND DONT WORK WITH CERAMIC and when its will be on the plate it will generate many noise. be carefull rly. Just no need to use 
 
 * **LDO(5V)** : <LM7805> (another legend its just works)
 
@@ -36,6 +39,10 @@ In this document, I want to describe a list of components for the boards and exp
 
 **Comment**
 **2025-09-16** : I change ADC from `STM32G474CEU6` to `STM32G431RBT6` cuz second is cheapest and have same 3 parallel ADC. we anyway want just this function and strengh is not priority for that. `STM32G431RBT6` will work like 20% of max power and for `STM32G474CEU6` its mb 12-15%. But why i really change ADC is my mistake, i dont know how but i found `STM32G474CEU6` with price 2$ and now i tryed found it again and found only prices over 6$ i think google give me price for another MC (i think price for  `STM32G431RBT6` cuz it 2$) and i dont checked name for MC cuz was happy for this low price, dont repeat my mistakes recheck names for MC
+
+**Comment**
+**2025-11-18** : I discovered this at the final routing stage. The LM1117 requires output capacitors with a specific ESR (Equivalent Series Resistance), typically found in tantalum capacitors. Using low-ESR ceramic capacitors will cause it to oscillate and generate massive noise on the output.
+**WARNING** : If you use an LM1117 with only ceramic caps, your circuit WILL NOT WORK. Be really careful. Just don't use it in new designs.
 
 # 22.09.2025 "components for MOTHERboard"
 
