@@ -389,3 +389,35 @@ So I only had one real day, and I spent all of it just understanding how to plac
 I like how it's going. I think we can do it.
 
 <Have a good night, guys. We're almost there.>
+
+# 2025-11-24: LAYOUT - OVER.
+
+## Milestone
+*   **PCB:** Finished the PCB Layout / Routing.
+*   **Mechanics:** Tested the new connection mechanism between reducer stages (Success).
+*   **Printing:** Started printing the stator for the rotary support.
+
+## Current Status
+-   **PCB:** Yeah, we did it. The next step is a final error check (DRC), ordering the boards, and then... the scary part: Programming.
+-   **Printing:** The base wasn't printed because the extruder got stuck/clogged. But I did some thinking... why spend 5kg of plastic on a base that will still be lightweight? I decided to use a **cheap, heavy concrete block** instead.
+    *   Started printing the rotary support (had to cut angles slightly to fit the print bed).
+    *   Spent 4 hours fixing the jammed extruder. Learned a lesson: after cleaning plastic and reassembling, you need to give the printer time to "chill," or the thermal sensor won't work right.
+-   **CAD:** Designed a new mechanism to connect the two reducer stages. I made vertical slots for steel pins in the shaft, slots in the outer flange, and an 8mm plastic pin in the center for alignment. It's perfectly centered now.
+
+## Next Steps
+-   **PCB:** Order the boards!
+-   **CAD:** Print the rotor for the rotary support.
+
+## Comment
+Okay, I can only sleep 4 hours again, but I finished the layout and wrote this log.
+
+The next stage — Programming — is coming, and it's a little scary because the other stuff isn't fully finished. Drivers need to be ordered, mechanics aren't fully printed... but we need to go down this road. We can't stay still — that is the main rule.
+
+The order itself is a challenge. Waiting 1 month... for what? To potentially see fire from my board and then wait 1 month again? It's a risk, but I knew these nuances from the start. I understand them.
+
+If it really works... I can't imagine how happy I will be.
+And next month — exams. That's also a challenge.
+So, conditions are not friendly. But when were they ever? :)
+
+We broke through it.
+<Have a good night, sleep well guys>
