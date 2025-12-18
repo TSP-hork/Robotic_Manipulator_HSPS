@@ -421,3 +421,33 @@ So, conditions are not friendly. But when were they ever? :)
 
 We broke through it.
 <Have a good night, sleep well guys>
+
+# 2025-12-19: ALIVE!.. Maybe Alive...
+
+## Milestone
+*   Gerber, BOM, and CPL files for the Axis Channel blade are generated and ready for production.
+*   The 3D printer's hotend has been replaced; printing has resumed (after a month of waiting).
+*   Fixed the main problem with the reducer.
+*   `components.md` has been refactored into a more structured format.
+
+## Current Status
+-   **PCB:** Waiting for the "go" signal from my contact to place the board order. The logistics are complicated, so this is currently on hold.
+-   **Firmware:** The lab bench is set up. I have a dev board for motor control, the STM32H7A3 dev board, a Tang Nano FPGA board, three BLDC motors, optical and magnetic encoders, a lab PSU, and a ton of wires. The goal for this month is to get the core firmware up and running.
+-   **Printing:** The new hotend is installed. Tried to print the massive slew drive. The part is warping and lifting, but I will fix it. I think it's bad settings or G-code, but I'll probably need to build an enclosure for the printer anyway...
+-   **Documentation:** I completely rebuilt `components.md`. The old "just throw it in" style was great for brainstorming but terrible for actual work and comparison. The new version is structured and much more usable.
+
+## Next Steps
+-   **Firmware:** Start writing and debugging the core firmware on the dev boards.
+-   **PCB:** Push for the board order.
+-   **CAD:** Successfully print the slew drive and the reducer parts.
+
+## Comment
+It feels like a whole month just vanished. The last commit was on November 24th...
+
+Between work getting intense (late nights, releases) and university exams hitting hard, the robot had to take a backseat. I spent days that should have been for studying on generating production files, and now... waiting for logistics.
+
+It's frustrating. While the boards are in limbo, I need to finish my exams and, on my free days, start the firmware. I have everything I need to start writing and testing the code. By the time the real hardware arrives, the firmware should be 80% ready.
+
+Just sorry for this month... ~~it will happen again.~~
+
+<Have a good night, guys. The fight continues.>

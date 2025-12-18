@@ -1,57 +1,116 @@
-# Preface
+# Project Components Bible
 
-In this document, I want to describe a list of components for the boards and explain why I chose this particular component.
+This document contains a curated list of all components used in the project, with technical specifications and the reasoning behind each choice.
 
-# 06.09.2025 "components for axis channel"
+---
 
-* **RS-422** : <SN65HVD75DR> (I chose it because it's cheap, popular, and can handle my high frequency + we can use hot swap with it) **Data Rate 20Mbps**
+# Axis Channel Blade
 
-* **Filter** : <simple RC> (I chose it cuz we fight with very fast high frequency signals(spines) and want to protect our square signals ) **10pF + 1kOm**
+This section details all components for the modular Axis Channel power blade.
 
-* **Gate-drivers** : <UCC27201ADDA> (Its fast,cheap and work with 3.3 logic we need this anyway)**Half-Bridge,Vmax:20V,Ipeak:3A**
+## Power Supply
+### DC/DC Converters: TPS54360BDDAR
 
-* **Amplifier** : <INA240> (Cheap monster in this work. High CMRR, Zero-Drift, Wide Bandwidth and price like rice )**A1=20 V/V and +-6.75 mohm for shunt**
+#### TPS54360BDDAR
+- **Type:** Step-Down DC/DC Converter
+- **Specs:** 60V max input, 3.5A output
+- **Comment:** *It's cheap as a bolt, but it has a 60V input and a 3.5A output, which is just insane. No questions, we're choosing it.*
 
-* **Shunt** : <WSLP25125L000FEA> (just `3W` just `cheap` just `1%` just 5mohm )
+### LDO (+3.3V): TLV1117-33IDCYR
 
-* **ADC** : <STM32G431RBT6> (Cheap and work like expencive ADC but also can in logic work and also rice price)
+#### TLV1117-33IDCYR
+- **Type:** Low-Dropout Regulator
+- **Specs:** 3.3V output, 800mA max current
+- **Comment:** *It works with ceramic capacitors and has better characteristics than the old LM1117. And it's pretty cheap. The LM1117 is a legend, BUT IT DOESN'T WORK WITH CERAMIC CAPS and will generate massive noise. Be really careful. Just don't use it in new designs.*
 
-* **DC/DC(12V)** : <TPS54360BDDAR> (it's cheap as a bolt, but it has 60 V input and 800 mV-58 V output, and 3.5 A is just insane, no questions, we choose it)
+### LDO (+5V): LM7805 (DPAK/TO-252)
 
-* **LDO(3.3V)** : <TLV1117-33IDCYR> it's can work with ceramic capasitors and have better characteristics then lm1117. And it's pretty cheap. 
+#### LM7805 (DPAK/TO-252)
+- **Type:** Linear Voltage Regulator
+- **Specs:** 5V output, 1.5A max current
+- **Comment:** *Another legend. It just works.*
 
-* <LM1117-3.3> (no comments for legend) 
-**updated: 2025-11-18** BUT LEGEND DONT WORK WITH CERAMIC and when its will be on the plate it will generate many noise. be carefull rly. Just no need to use 
+### Power Inductors for DC/DC : NPIM74C4R7MTRF
 
-* **LDO(5V)** : <LM7805> (another legend its just works)
+#### NPIM74C4R7MTRF
+- **Specs:** 4.7uH, 5.5A Saturation Current
+- **Price:** ~$0.8
 
-* **N-MOSFET** : <NTMFS3D5N08XT1G> (Its fastest mosfet what i can found and its pretty cheap with good cool body just ideal) **QG=23 nC !!!!** **80V,3mOhms** 
+---
 
-* **N-MOSFET(similar)** : <BSC030N08NS5> (Just good and cheap but not fastest if u want u can use it u wellcome)**QG=73nC,80V,3mOhms**
+## Power Stage & Drivers 
+### N-Channel MOSFET: NTMFS3D5N08XT1G
 
-* **inductors for DC/DC** : 
-    * <NPIM74C4R7MTRF> 4.7uH 5.5A <0.8$>
-    * <IHLP2020CZER4R7M11> 4.7 uH 4.5A <0,7$>
-    
+#### NTMFS3D5N08XT1G
+- **Type:** Power MOSFET, SMD
+- **Specs:** 80V, 3mOhms, Qg = 23nC
+- **Comment:** *It's the fastest MOSFET I could find, it's pretty cheap, and has a good thermal package (SuperSO8). Just ideal. The Qg of 23nC is insane!*
 
-**Comment**
-**2025-09-07** : Siting after midnight and very happy cuz i found good silicon rock yeeey ^^! I hope u slept in this weekend night and have a good weekend ty for reading :)
+#### BSC030N08NS5
+- **Type:** Power MOSFET, SMD
+- **Specs:** 80V, 3mOhms, Qg = 73nC
+- **Comment:** *Just a good and cheap alternative, but not the fastest. If you want, you can use it, you're welcome.*
 
-**Comment**
-**2025-09-16** : I change ADC from `STM32G474CEU6` to `STM32G431RBT6` cuz second is cheapest and have same 3 parallel ADC. we anyway want just this function and strengh is not priority for that. `STM32G431RBT6` will work like 20% of max power and for `STM32G474CEU6` its mb 12-15%. But why i really change ADC is my mistake, i dont know how but i found `STM32G474CEU6` with price 2$ and now i tryed found it again and found only prices over 6$ i think google give me price for another MC (i think price for  `STM32G431RBT6` cuz it 2$) and i dont checked name for MC cuz was happy for this low price, dont repeat my mistakes recheck names for MC
+### Gate Driver: NCP5106BDR2G
 
-**Comment**
-**2025-11-18** : I discovered this at the final routing stage. The LM1117 requires output capacitors with a specific ESR (Equivalent Series Resistance), typically found in tantalum capacitors. Using low-ESR ceramic capacitors will cause it to oscillate and generate massive noise on the output.
-**WARNING** : If you use an LM1117 with only ceramic caps, your circuit WILL NOT WORK. Be really careful. Just don't use it in new designs.
+#### NCP5106BDR2G
+- **Type:** Half-Bridge Gate Driver
+- **Specs:** 10-20V Supply, 3.3V/5V Logic Compatible, 100ns internal Dead-Time
+- **Comment:** *After a long search, this is the champion. Cheaper than the TI parts, has built-in hardware dead-time (which is a lifesaver), and is readily available on JLCPCB.*
 
-# 22.09.2025 "components for MOTHERboard"
+---
 
-~~* **slot for blade** : `10018783-10201TLF` (just cuz it cheapest fastest and just can be bough.  rly i spent 4 hours for just found any solution and use `PCI` is only what i can :/ )~~
+## Measurement & Feedback
+### Current Sense Amplifier: INA240A1DR
 
-**comment**
-**25.09.25** : 64 pins is not enough i think i will pick PCI with 80+ but change schematic later sry
+#### INA240A1DR
+- **Type:** Zero-Drift, High-Side/Low-Side Current Sense Amplifier
+- **Specs:** Gain = 20 V/V
+- **Comment:** *A cheap monster for this job. High CMRR, Zero-Drift, Wide Bandwidth, and a price like rice.*
 
-**comment**
-**28.09.25** : We will use spice model from TI for similar MOSFET cuz they have same characteristics 
+### Current Sense Shunt Resistor: WSLP25125L000FEA
 
-* **slot for blade** : `10018784-10202TLF` 98 pos PCI 
+#### WSLP25125L000FEA
+- **Type:** Metal Strip Current Sense Resistor
+- **Specs:** 5mOhms, 3W, 1%
+- **Comment:** *Just 3 Watts, just cheap, just 1% tolerance. Perfect.*
+
+### ADC & On-Board Logic: STM32G431RBT6
+
+#### STM32G431RBT6
+- **Type:** Microcontroller with advanced analog peripherals
+- **Specs:** 3x Synchronizable 12-bit ADCs, Cortex-M4 @ 170MHz
+- **Comment:** *It's cheap and works like an expensive ADC, but it can also handle logic tasks. The price is like rice. I initially made a mistake and almost ordered the more expensive G474, thinking it was $2. Don't repeat my mistakes, always re-check part names!*
+
+---
+
+## Interface
+### RS-485 Transceiver: SN65HVD75DR
+
+#### SN65HVD75DR
+- **Type:** 3.3V RS-485/RS-422 Transceiver
+- **Specs:** 20 Mbps, 16kV ESD Protection
+- **Comment:** *Cheap, popular, can handle my high frequencies, and robust enough for hot-swapping.*
+
+### Input Filter (Encoder): Simple RC Filter
+
+#### Simple RC Filter
+- **Type:** Passive Low-Pass Filter
+- **Specs:** R=330 Ohm, C=33 pF
+- **Comment:** *Chosen because we need to fight very fast high-frequency signals (spikes) and protect the clean square waves from the encoders.*
+
+---
+
+# Motherboard
+
+## Main Connector (Blade Slot): 10018784-10202TLF
+
+#### 10018784-10202TLF
+- **Type:** PCIe x8, 98-position, Vertical, Through-Hole Card Edge Connector
+- **Comment:** *Spent 4 hours just to find any solution, and using a standard PCIe connector is the only thing I can think of that's cheap, fast, and widely available. I realized 64 pins wasn't enough, so I upgraded to 98.*
+
+---
+
+# Input Board
+
+*(Components for this board will be detailed later)*
