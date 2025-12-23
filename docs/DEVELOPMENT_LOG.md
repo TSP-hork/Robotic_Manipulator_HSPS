@@ -451,3 +451,24 @@ It's frustrating. While the boards are in limbo, I need to finish my exams and, 
 Just sorry for this month... ~~it will happen again.~~
 
 <Have a good night, guys. The fight continues.>
+
+# 2025-12-24: General Kenobi!
+
+## Milestone
+*   Updated components.md.
+*   Successfully printed the slew drive.
+
+## Comment
+You know how I'll name the next dev log... *khm*.
+
+This month was dominated by exams, and I just couldn't work on the robot full-time. But now, with the last exam of the year on Dec 26th and the next one not until Jan 11th, I'll have plenty of time to develop the firmware.
+
+The guy who's ordering my boards says he's ready to try and place the order in the coming days.
+
+Printing is going well, too! I made a cardboard enclosure for my printer, and the slew drive was successfully printed with new, faster settings.
+
+It was a hard month, but now I believe it's over, or at least it's giving me a little break. Anyway, we are reaching the middle point of the project!
+
+Thanks for your attention :)
+
+<Good night, guys :))>

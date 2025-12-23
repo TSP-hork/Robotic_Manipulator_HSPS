@@ -19,9 +19,16 @@ This section details all components for the modular Axis Channel power blade.
 ### LDO (+3.3V): TLV1117-33IDCYR
 
 #### TLV1117-33IDCYR
-- **Type:** Low-Dropout Regulator
-- **Specs:** 3.3V output, 800mA max current
-- **Comment:** *It works with ceramic capacitors and has better characteristics than the old LM1117. And it's pretty cheap. The LM1117 is a legend, BUT IT DOESN'T WORK WITH CERAMIC CAPS and will generate massive noise. Be really careful. Just don't use it in new designs.*
+-   **Type:** Low-Dropout Regulator
+-   **Specs:** 3.3V output, 800mA max current, **Stable with Ceramic Capacitors**.
+-   **Comment:** *(no comments for legend)*
+
+- **updated: 2025-11-18** BUT LEGEND DONT WORK WITH CERAMIC and when its will be on the plate it will generate many noise. be carefull rly. Just no need to use *
+
+#### LM1117-3.3
+-   **Type:** Low-Dropout Regulator
+-   **Specs:** 3.3V output, 800mA max current.
+-   **Reason for Rejection:** *LEGEND DONT WORK WITH CERAMIC and when its will be on the plate it will generate many noise. be carefull rly. Just no need to use*
 
 ### LDO (+5V): LM7805 (DPAK/TO-252)
 
@@ -30,7 +37,12 @@ This section details all components for the modular Axis Channel power blade.
 - **Specs:** 5V output, 1.5A max current
 - **Comment:** *Another legend. It just works.*
 
-### Power Inductors for DC/DC : NPIM74C4R7MTRF
+### Power Inductors for DC/DC : MWSA0603S-4R7MT
+
+#### MWSA0603S-4R7MT
+- **Specs:** 33mΩ 4.7uH 6A 9A ±20%
+- **Price:** ~$0.11
+
 
 #### NPIM74C4R7MTRF
 - **Specs:** 4.7uH, 5.5A Saturation Current
@@ -51,12 +63,37 @@ This section details all components for the modular Axis Channel power blade.
 - **Specs:** 80V, 3mOhms, Qg = 73nC
 - **Comment:** *Just a good and cheap alternative, but not the fastest. If you want, you can use it, you're welcome.*
 
-### Gate Driver: NCP5106BDR2G
+### Gate Driver: IRS21867S 
 
-#### NCP5106BDR2G
-- **Type:** Half-Bridge Gate Driver
-- **Specs:** 10-20V Supply, 3.3V/5V Logic Compatible, 100ns internal Dead-Time
-- **Comment:** *After a long search, this is the champion. Cheaper than the TI parts, has built-in hardware dead-time (which is a lifesaver), and is readily available on JLCPCB.*
+#### IRS21867S (Infineon / International Rectifier)
+-   **Type:** High and Low Side Driver
+-   **Specs:** 600V Max, **4.0A / 4.0A** Peak Current, 3.3V/5V Logic Compatible.
+-   **Comment:** *Cheap (0.60$). good specs. over 5k in stock. why not*
+
+#### UCC27282DR (Texas Instruments)
+-   **Type:** Half-Bridge Gate Driver
+-   **Specs:** 120V Max, 3A Peak Current, 3.3V/5V Logic Compatible, **Input Interlock**.
+-   **Reason for Rejection:** *Too expensive.... (on JLCPCB 1$) and only 3A*
+
+#### NCP5106BDR2G (OnSemi)
+-   **Type:** Half-Bridge Gate Driver
+-   **Specs:** 600V Max, 0.25A/0.5A Peak Current, **100ns internal Dead-Time**.
+-   **Reason for Rejection:** *Initially looked like a great cheap and safe option due to the fixed hardware dead-time. However, a deeper look into the datasheet revealed the **output current is too low (0.5A)**. This would lead to slow switching times and massive overheating of the MOSFETs at our target frequencies. A critical flaw.*
+
+#### UCC27201ADDA (Texas Instruments)
+-   **Type:** Half-Bridge Gate Driver
+-   **Specs:** 20V Max, 3A Peak Current, 3.3V Logic Compatible.
+-   **Reason for Rejection:** *This was the first "ideal" candidate. It's powerful and compatible. However, its price is significantly higher (~$1.2+) than comparable or even superior alternatives from other manufacturers.*
+
+#### UCC27282DR-JSM 
+-   **Type:** Half-Bridge Gate Driver (Clone)
+-   **Specs:** 250V Max, 4A Peak Current, Fixed 250ns Dead-Time.
+-   **Reason for Rejection:** *The specs looked good, but this is a clone from a lesser-known Chinese manufacturer (JSMICRO) with a Chinese-only datasheet. I was concerned about long-term availability and reliability. If this driver dies, I don't know where I would find a replacement. So, I just continued my search for a more standard, tier-1 component.*
+
+#### TC4424A (Microchip)
+-   **Type:** Dual Low-Side Driver
+-   **Specs:** 18V Max, 4.5A Peak Current.
+-   **Reason for Rejection:** *Fundamentally unsuitable. This is **not a half-bridge driver**. It cannot drive the high-side MOSFET in our configuration as it lacks a bootstrap circuit. It would be instantly destroyed.*
 
 ---
 
