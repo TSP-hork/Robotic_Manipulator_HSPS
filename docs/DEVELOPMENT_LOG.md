@@ -472,3 +472,45 @@ It was a hard month, but now I believe it's over, or at least it's giving me a l
 Thanks for your attention :)
 
 <Good night, guys :))>
+
+
+# 2026-01-03: Hello there!
+
+## Milestone
+*   **FPGA Core:** Successfully completed ~80% of the FPGA code.
+*   **CAD:** Started printing the final version of the reducer.~~(and fixed the printer)~~
+
+## Current Status
+-   **Firmware:** Written the modular architecture in SystemVerilog.
+    - `system_storage`: The CSR brain of the axis.
+    - `pwm_generator`: Center-aligned PWM for FOC.
+    - `deadtime`: Hardware protection for MOSFETs.
+    - `quadrature_decoder`: Glitch-filtered encoder reading.
+    
+    *Key Discovery:* Spent some time fighting with the encoder signal. Turns out the Omron encoder with Open Collector output needs strong external pull-up resistors to 3.3V. Once added, the FPGA saw the signal instantly.
+
+-   **CAD:** 
+    -   **Upgrade:** Installed a new PEI build plate.
+    -   **Repair:** Fixed critical mechanical play in the printer. It turns out the toolhead was misaligned due to an assembly error. I tightened all the V-wheels, and now everything is working fine.
+
+## Next Steps
+-   **Firmware:** Connect the PWM output to the real gate driver and finalize the FPGA core.
+-   **PCB:** Push for the board order.
+-   **CAD:** Finish printing reducer parts and start printing the rotor for the slew drive.
+
+## Comment
+It's 2:00 AM.
+
+Sleep is.. what is this.. khm..
+
+FPGA is very interesting, very strong, very fast AND!! very scary!!
+
+Honestly, I just can't understand it sometimes... **Assembler feels easier!!!**
+
+But after two days of trying to decipher these hieroglyphs, I finally started to understand, and to be honest — it's simple. On an STM32, you have a thousand functions with strange names and you need to know them all. But on an FPGA, you just have logic gates that haven't changed in the last 100 years. It feels like playing chess for the first time.
+
+As for CAD, I'm so glad for the new PEI plate. The adhesion is insane — I actually need to heat the plate just to remove PETG parts. 
+
+I also fixed the backlash today. Spent 3 hours on it because I had to disassemble the entire printer, reassemble it, realize I missed something, disassemble it again... aaaaand finally assembled it right.
+
+<Have aaaa very good night guys :) Happy holidays!>
