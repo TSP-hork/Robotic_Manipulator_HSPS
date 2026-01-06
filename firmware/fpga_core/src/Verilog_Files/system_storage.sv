@@ -12,7 +12,11 @@ module system_storage #(
 
     // --- Encoders and PWM interface ---
     
-    input  logic [31:0] encoders_in [0 : AXIS_COUNT-1], // 6 enc inputs
+    input  logic [31:0] enc_pos_in    [0 : AXIS_COUNT-1],
+    input  logic [31:0] enc_period_in [0 : AXIS_COUNT-1],
+    input  logic        enc_dir_in    [0 : AXIS_COUNT-1],
+    input  logic        enc_index_in  [0 : AXIS_COUNT-1],
+
     
     output logic [15:0] pwm_duties  [0 : AXIS_COUNT-1], // 6 duties outputs 
     output logic        enables     [0 : AXIS_COUNT-1]  // 6 enable outputs
@@ -55,7 +59,9 @@ module system_storage #(
         if (axis_id < AXIS_COUNT) begin
             case (reg_id)
                 
-                4'd4: rdata = encoders_in[axis_id]; 
+            4'd4: rdata = enc_pos_in[axis_id];    // position
+            4'd5: rdata = enc_period_in[axis_id]; // speed
+            4'd6: rdata = {30'd0, enc_index_in[axis_id], enc_dir_in[axis_id]}; // status
                 
                 
                 default: rdata = regs[axis_id][reg_id];

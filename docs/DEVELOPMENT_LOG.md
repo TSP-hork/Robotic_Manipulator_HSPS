@@ -514,3 +514,27 @@ As for CAD, I'm so glad for the new PEI plate. The adhesion is insane — I actu
 I also fixed the backlash today. Spent 3 hours on it because I had to disassemble the entire printer, reassemble it, realize I missed something, disassemble it again... aaaaand finally assembled it right.
 
 <Have aaaa very good night guys :) Happy holidays!>
+
+# 2026-01-06: FPGA CORE COMPLETE!
+
+## Milestone
+*   **FPGA Core:** Successfully completed the FPGA core architecture.
+*   **CAD:** Printed and assembled the final version of the reducer!!!
+*   **PCB:** Boards are ordered.
+
+## Current Status
+-   **Firmware:** All FPGA modules are written and verified. The FPGA is ready to connect to the MCU and drivers to spin the motor! But... this also means I now need to write the code for the MCU.
+-   **CAD:** I assembled the reducer and it works!! It's a little tight (I will adjust tolerances in the next iteration), but... **GUYS, IT'S A 100:1 RATIO, IT FITS IN THE PALM OF MY HAND, AND IT WORKS!**
+-   **PCB:** Boards are finally ordered! In about two weeks, we'll see the Moment of Truth (and hopefully no magic smoke).
+
+## Next Steps
+-   **Firmware:** Develop the MCU firmware and connect the PWM output to the real gate driver.
+-   **CAD:** Refine reducer tolerances, start printing the rotary support, and update the CAD models.
+
+## Comment
+
+You know what time it is? 2:00 AM! Again!
+
+But I'm just happy because I'm done with the FPGA part and can finally move to the next step of making this robot alive. ^^
+
+<Have a goooood night!>
