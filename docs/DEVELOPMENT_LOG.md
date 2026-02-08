@@ -538,3 +538,31 @@ You know what time it is? 2:00 AM! Again!
 But I'm just happy because I'm done with the FPGA part and can finally move to the next step of making this robot alive. ^^
 
 <Have a goooood night!>
+
+# 2026-02-08: ADC 400ns without CPU!
+
+## Milestone
+*   **FPGA Core:** Updated code to test the new ADC setup and adjusted delays.
+*   **CAD:** Successfully printed the rotary support and performed a test assembly.
+*   **MCU:** Implemented a bare-metal, zero-CPU-overhead Dual ADC-to-SPI Data Pipeline.
+
+## Current Status
+-   **Firmware:** The FPGA core is ready and waiting for the other parts of the system. I've tested the new ADC setup with it, and it works! Latency is projected to be around **400 ns**.
+-   **CAD:** I fought with the printer all month for just two parts, but the rotary support is finally finished. I think I've learned all its quirks. (If you really try to build this, I hope you buy a better printer, but my goal is to prove you can make my robot on ANY printer).
+-   **PCB:** Still waiting ;-; .
+
+## Next Steps
+-   **Firmware:** Make the motor spin using the full chain: ADC -> FPGA -> STM32H7. Maybe even start on FOC.
+-   **CAD:** Update the model for the BASE and figure out how to print this monster. I think it will eat more than 1kg of PETG.
+
+## Comment
+
+You know what? I can't believe a whole month just passed. I spent almost all of it trying to print, but this printer just didn't want to cooperate. I spent a huge part of my time just trying to understand what I was doing wrong. Two recommendations: 1. Wash your build plate (really, it's insane how well it works). 2. Don't buy an End... *khm*. Change your Z-offset while the printer is printing the first layer, and if it doesn't stick, make the gap smaller.
+
+And the whole month I was fighting with the ADC. I tried to configure it so that when the ADC sends data to SPI, a leg of the MCU would catch it and raise a logic level. But the first week ended with zero results. The second week, I actually made it work, but the gap between the data and the logic signal was **20 µs**. I can't find the words to describe how sad it was to see that. After a whole weekend, I got it down to **6 µs**. A good result in comparison, but VERY, VERY bad for my goal. I need the data after 1-2 µs max; 0.5 µs would be perfect, leaving me 9.5 or 19.5 µs for the other things in the FOC cycle.
+
+I don't know what I was doing in the third week, maybe I just deleted all my SPI and ADC code. But last week, I just sat on it after work and study, like 6 hours a day until 2 AM. And this Friday morning, I finished it. I can see that my ADC is working! It's just unbelievable. And now I've polished the code and even made a Makefile (ha-ha) for easy use later.
+
+Sorry for the long pause, guys!
+
+<HAVEEEEE AAAA GOOOOOOOOOOOOOOOD night :> >

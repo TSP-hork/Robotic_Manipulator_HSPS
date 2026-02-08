@@ -34,11 +34,3 @@ IO_PORT "enc_a" PULL_MODE=UP IO_TYPE=LVCMOS33;
 // Pin 26 -> Encoder B (White)
 IO_LOC "enc_b" 26;
 IO_PORT "enc_b" PULL_MODE=UP IO_TYPE=LVCMOS33;
-
-IO_LOC "spi_cs"   27;
-IO_LOC "spi_sck"  28;
-IO_LOC "spi_mosi" 29;
-IO_LOC "spi_miso" 30;
-
-IO_LOC "pwm_h"    31;
-IO_LOC "pwm_l"    32;
