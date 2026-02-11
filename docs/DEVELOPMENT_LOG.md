@@ -553,7 +553,7 @@ But I'm just happy because I'm done with the FPGA part and can finally move to t
 
 ## Next Steps
 -   **Firmware:** Make the motor spin using the full chain: ADC -> FPGA -> STM32H7. Maybe even start on FOC.
--   **CAD:** Update the model for the BASE and figure out how to print this monster. I think it will eat more than 1kg of PETG.
+-   **CAD:** Update the model for the cabin and figure out how to print this monster. I think it will eat more than 1kg of PETG.
 
 ## Comment
 
@@ -566,3 +566,16 @@ I don't know what I was doing in the third week, maybe I just deleted all my SPI
 Sorry for the long pause, guys!
 
 <HAVEEEEE AAAA GOOOOOOOOOOOOOOOD night :> >
+
+# 2026-02-12: Architecture Document 
+
+### Milestone
+*   **docs:** Created `architecture.md` — full system architecture document.
+*   **CAD:**
+
+### Comment
+2:33 AM. Classic.
+
+many bla bla bla but it is necessary
+
+<Have a good night ~>
