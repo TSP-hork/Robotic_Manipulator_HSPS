@@ -553,7 +553,7 @@ But I'm just happy because I'm done with the FPGA part and can finally move to t
 
 ## Next Steps
 -   **Firmware:** Make the motor spin using the full chain: ADC -> FPGA -> STM32H7. Maybe even start on FOC.
--   **CAD:** Update the model for the cabin and figure out how to print this monster. I think it will eat more than 1kg of PETG.
+-   **CAD:** Update the model for the Shoulder_Clevis_Mount and figure out how to print this monster. I think it will eat more than 1kg of PETG.
 
 ## Comment
 
@@ -571,7 +571,7 @@ Sorry for the long pause, guys!
 
 ### Milestone
 *   **docs:** Created `architecture.md` — full system architecture document.
-*   **CAD:**
+*   **CAD:** Strarted printing shoulder clevis mount (cabin) and it`s eat 970 gr PETG with 80% fill (im happy).
 
 ### Comment
 2:33 AM. Classic.
@@ -579,3 +579,38 @@ Sorry for the long pause, guys!
 many bla bla bla but it is necessary
 
 <Have a good night ~>
+
+# 2026-03-12: The Beginning of the End
+
+## Milestone
+*   **FPGA Core:** Finished `top.sv` for FOC, encoder, and ADC. Full system integration complete.
+*   **MCU:** Finished FOC implementation and integrated it into the complete system.
+*   **CAD:** Printed the last main structural part.
+*   **PCB:** Boards are VERY NEAR.
+
+## Current Status
+-   **Firmware:** All parts are working together as one system. **My architecture is correct.** On dupont wires, I achieved 20 kHz FOC. The full real-time chain works end-to-end: FPGA reads encoders and ADC currents from G4, packs them into a 256-bit SPI frame, sends to the H7, the H7 runs FOC and sends PWM commands back — all at 20 kHz, on a pile of dupont wires.
+-   **CAD:** The shoulder clevis mount is printed. We now have all the parts to start assembling the body of this plastic hero.
+-   **PCB:** Boards are coming to my house around March 20th. ~~hope they will work~~
+
+## Next Steps
+-   **Firmware:** Freeze while assembling the body.
+-   **CAD:** Start assembling all parts of the robot and polish the fit of each piece.
+
+## Comment
+
+We have come to the end of this work, and we will end this at any cost.
+
+I can't get used to the fact that every new step with electronics and code is a month of work. And I really do work on it — sitting for hours, two or more nights a week until 4 or 5 AM, trying, trying, trying again and again. And the funniest part? Not understanding what isn't working. Is it the code? A dupont wire? Did I assemble the circuit wrong? Maybe the encoder is on the wrong side? That uncertainty is the hardest part of all of this.
+
+**But anyway, like everything else, it just needs time. And what can stop me now? Huh?**
+
+**The firmware part is over!**
+
+Let's just remember what I wanted to finish from the start: CAD, PCB, and... firmware. Now we just need to make it all work together. We have all the parts for it.
+
+**Time to finish this.**
+
+**AND NOOOWW..** time to go to sleep.
+
+<Have a good night, good person! :> >
