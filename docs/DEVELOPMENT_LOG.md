@@ -615,7 +615,7 @@ Let's just remember what I wanted to finish from the start: CAD, PCB, and... fir
 
 <Have a good night, good person! :> >
 
-### **2026-04-24: Yep, it's me again. And I'm not dead.**
+# **2026-04-24: Yep, it's me again. And I'm not dead.**
 
 ## Milestone
 *   **Docs:** Fixed the `architecture.md` file.
