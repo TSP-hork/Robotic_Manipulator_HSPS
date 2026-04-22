@@ -1,868 +1,704 @@
-# Main CPU Firmware Architecture
+## Architecture.md
 
-## Overview
+# Architecture of the HSPS Robotic Manipulator
 
-This firmware controls a robotic manipulator. The architecture is designed around
-three principles:
+## Table of Contents
 
-1. **Portability** — algorithms are hardware-independent and can run on any MCU
-2. **Extensibility** — new features are added without modifying existing code
-3. **Determinism** — zero runtime overhead from the architecture itself
-
-The system is split into four layers. Each layer has exactly one responsibility
-and exactly one reason to change.
-
-```
-┌─────────────────────────────────────────────┐
-│  logic/         Pure algorithms (C++)       │ ← portable
-│  utility/       Reusable building blocks    │ ← portable
-│  abstract/      Hardware contract (C)       │ ← stable, rarely changes
-│  driver/        Chip-specific code (C/ASM)  │ ← replaced per platform
-└─────────────────────────────────────────────┘
-```
-
-Data flows through a real-time cascade:
-
-```
-Trajectory (100 Hz)
-    → Kinematics (100 Hz)
-        → Servo loop (1 kHz)
-            → FOC current loop (50 kHz)
-                → PWM output
-```
-
-Each level only talks to its neighbors. FOC does not know about kinematics.
-Kinematics does not know about PWM registers.
-
----
-
-## System Context
-
-Before diving into firmware, here is where the Main CPU sits in the
-overall robot:
-
-```
-                           HSPS Robot
-                              │
-         ┌────────────────────┼────────────────────┐
-         │                    │                    │
-   [Power Blades]      [Motherboard]      [Technologist Module]
-    6× motor               │       │          tool control
-    drivers                │       │          high-level commands
-    6× STM32G4             │       │
-    (ADC current)          │       │
-         │          [FPGA ECP5]  [MCU STM32H7A3] ──────┘
-         │              │              │
-         └── SPI ───────┘              │    ← THIS FIRMWARE
-                        │              │
-                        └──── bus ─────┘
-                        data exchange
-                        (abstracted transport)
-```
-
-The FPGA handles all real-time I/O in parallel: PWM generation, encoder
-decoding, ADC data collection from the G4 MCUs on each Power Blade.
-The main MCU handles all math: FOC, servo loops, kinematics, trajectory
-planning.
-
-Each Power Blade contains a STM32G4 that performs high-resolution ADC
-sampling of two phase currents, triggered by the FPGA at the PWM center
-point. The G4s communicate with the FPGA via SPI (FPGA = master).
-
-The main MCU and FPGA communicate through a shared register interface.
-The transport layer is **abstracted** — the firmware does not care whether
-registers are accessed via SPI transactions or direct memory-mapped
-writes via FMC. The FPGA always controls the exchange timing.
+- [1. Overview](#1-overview)
+- [2. Core Concept](#2-core-concept)
+- [3. System Architecture](#3-system-architecture)
+  - [3.1 System Block Diagram](#31-system-block-diagram)
+  - [3.2 Data Flow: Control Loop](#32-data-flow-control-loop)
+  - [3.3 Power Distribution](#33-power-distribution)
+- [4. Electronics Architecture](#4-electronics-architecture)
+  - [4.1 Motherboard](#41-motherboard)
+  - [4.2 MCU: STM32H7A3](#42-mcu-stm32h7a3)
+  - [4.3 FPGA: Lattice ECP5 (LFE5U-45F)](#43-fpga-lattice-ecp5-lfe5u-45f)
+  - [4.4 MCU ↔ FPGA Communication](#44-mcu--fpga-communication)
+  - [4.5 Power Blade (Axis Channel)](#45-power-blade-axis-channel)
+  - [4.6 Technologist Module](#46-technologist-module)
+  - [4.7 Input Power Board](#47-input-power-board)
+- [5. Firmware Architecture](#5-firmware-architecture)
+  - [5.1 FPGA Modules](#51-fpga-modules)
+  - [5.2 MCU Firmware](#52-mcu-firmware)
+  - [5.3 Control Loop Timing](#53-control-loop-timing)
+- [6. Mechanical Architecture](#6-mechanical-architecture)
+  - [6.1 Kinematic Configuration](#61-kinematic-configuration)
+  - [6.2 Slew Drive (Rotary Support)](#62-slew-drive-rotary-support)
+  - [6.3 Cabin](#63-cabin)
+  - [6.4 Shoulder Module](#64-shoulder-module)
+  - [6.5 Backpack (Motor + Reducer Mount)](#65-backpack-motor--reducer-mount)
+  - [6.6 Balanced Cycloidal Reducer](#66-balanced-cycloidal-reducer)
+  - [6.7 Base](#67-base)
+- [7. The Technologist Module: Design Philosophy](#7-the-technologist-module-design-philosophy)
+- [8. Design Principles](#8-design-principles)
+- [9. Target Specifications](#9-target-specifications)
+- [10. Current Status and Roadmap](#10-current-status-and-roadmap)
 
 ---
 
-## Directory Structure
+## 1. Overview
+
+The HSPS (Hot-Swappable Part System) Robotic Manipulator is a fast, precise,
+and affordable robotic arm designed for simple assembly, easy operation,
+and tool-agnostic deployment. It is built from four electronic subsystems:
+an Input Power Board, a Motherboard, hot-swappable Power Blades, and a
+hot-swappable Technologist Module.
+
+The robot is designed so that any person with a 3D printer and basic tools
+can build an instrument capable of precise spatial positioning — precise
+enough to mill aluminum and manufacture parts for a stronger, metal version
+of itself.
+
+
+
+## 2. Core Concept
+
+The central idea behind HSPS is the separation of concerns:
+
+- **The Robot** is a precision positioning tool. It moves a point in space
+  from A to B. It is a black box with a simple API.
+- **The Technologist Module** defines *what to do*. It controls the tool,
+  sends high-level commands, and can be swapped in seconds.
+- **The Power Blades** drive the motors. They are hot-swappable cards that
+  plug into the motherboard via a standard PCIe physical connector.
+
+This separation means that switching from milling to welding requires only
+swapping the Technologist Module and the tool — not reprogramming the robot.
+
+
+
+## 3. System Architecture
+
+### 3.1 System Block Diagram
 
 ```
-main_cpu/
-│
-├── logic/                          # Pure algorithms — PORTABLE
-│   ├── 0_foc/                      # Field-Oriented Control
-│   │   ├── foc.hpp                 # FOC controller class
-│   │   ├── foc.cpp
-│   │   ├── clarke_park.hpp         # Clarke/Park transforms (inline)
-│   │   └── svpwm.hpp              # Space Vector PWM (inline)
-│   │
-│   ├── 1_servo/                    # Position/velocity servo loop
-│   │   ├── servo.hpp
-│   │   ├── servo.cpp
-│   │   ├── servo_chain.hpp         # Compile-time extension pipeline
-│   │   └── extensions/             # Servo loop extensions (infinite)
-│   │       ├── damping/
-│   │       │   └── damping.hpp
-│   │       ├── friction/
-│   │       │   └── friction.hpp
-│   │       ├── cogging/
-│   │       │   └── cogging.hpp
-│   │       └── .../
-│   │
-│   ├── 2_kinematics/               # Forward/inverse kinematics
-│   │   ├── forward.cpp
-│   │   ├── inverse.cpp
-│   │   └── jacobian.cpp
-│   │
-│   ├── 3_trajectory/               # Path planning
-│   │   ├── planner.cpp
-│   │   ├── interpolator.cpp
-│   │   └── s_curve.cpp
-│   │
-│   ├── 4_runtime/                  # System orchestration
-│   │   ├── state_machine.cpp       # Operating states
-│   │   ├── homing.cpp             # Homing sequence
-│   │   ├── protocol/              # Technologist module communication
-│   │   │   ├── packet.cpp         # Packet parsing/building
-│   │   │   ├── commands.cpp       # Command handlers
-│   │   │   └── feedback.cpp       # Status reporting
-│   │   └── modes/                 # Special operating modes (infinite)
-│   │       └── resonance_scan/
-│   │
-│   └── safety/                     # Safety — ALWAYS ON, never disabled
-│       ├── guardian.cpp            # Last barrier before hardware
-│       └── watchdog.cpp           # Software watchdog
-│
-├── utility/                        # Reusable building blocks — PORTABLE
-│   ├── math/
-│   │   ├── matrix/                 # Matrix operations
-│   │   ├── quaternion/            # Quaternion math
-│   │   └── spline/                # Spline interpolation
-│   ├── control/
-│   │   ├── pid/                   # PID controller
-│   │   └── filters/               # Notch, lowpass, Kalman
-│   ├── signal/
-│   │   └── dsp/                   # FFT, spectral analysis
-│   └── utils/
-│       ├── ring_buffer/
-│       └── crc/
-│
-├── abstract/                       # Hardware contract — STABLE
-│   ├── types.h                     # Shared data structures
-│   └── hw_contract.h              # Documents required HW functions
-│
-├── driver/                         # Chip-specific — REPLACEABLE
-│   ├── hw_impl.h                  # Inline HW functions (the bridge)
-│   ├── hw_binding.c               # Peripheral initialization
-│   ├── config.h                   # Pin assignments, frequencies
-│   ├── startup/
-│   │   ├── vectors.c
-│   │   ├── reset_handler.c
-│   │   └── linker_script.ld
-│   ├── isr/
-│   │   ├── foc_isr.c
-│   │   └── servo_isr.c
-│   ├── mcu/
-│   │   ├── rcc.c                  # Clock tree
-│   │   ├── gpio.c                 # Pin configuration
-│   │   ├── adc.c                  # ADC + DMA
-│   │   ├── tim.c                  # Timers
-│   │   ├── dma.c                  # DMA channels
-│   │   ├── cordic_hw.c            # Hardware CORDIC
-│   │   └── spi.c                  # SPI peripheral
-│   ├── fpga_bus/
-│   │   ├── fpga_transport.h       # Transport abstraction
-│   │   ├── fpga_spi.c            # Current: frame-based SPI (FPGA = master)
-│   │   └── fpga_fmc.c            # Future: memory-mapped transport
-│   ├── comms/
-│   │   └── spi_tech.c            # SPI to technologist module
-│   └── vendor/
-│       └── CMSIS/                 # Vendor-provided headers (do not edit)
-│           ├── stm32h7a3xx.h
-│           ├── system_stm32h7xx.h
-│           └── core_cm7.h
-│
-├── main.cpp                        # Entry point + configuration
-├── CMakeLists.txt
-└── Makefile
+[PSU 8-60V] ──→ [Input Power Board*] ──→ [MOTHERBOARD]
+                                              │
+                 ┌────────────┬───────────────┼───────────────┬────────────┐
+                 │            │               │               │            │
+            [Blade 1]   [Blade 2]   ...  [Blade 6]   [Technologist Module]
+                 │            │               │               │
+           [Motor+Enc]  [Motor+Enc]     [Motor+Enc]      [Tool/End Effector]
+
+
+Inside the Motherboard:
+┌─────────────────────────────────────────────────────────────────────┐
+│                                                                     │
+│   [FPGA: Lattice ECP5] ←── data bus ──→ [MCU: STM32H7A3]          │
+│        │                                      │                     │
+│        ├─ PWM signals      → Blade PCIe slots  ├─ FOC algorithm     │
+│        ├─ Encoder data     ← Blade PCIe slots  ├─ Inverse kinematics│
+│        ├─ SPI (ADC data)   ← Blade PCIe slots  ├─ API ↔ Tech Module│
+│        ├─ Hardware dead-time protection         ├─ State machine     │
+│        └─ Hardware clock sync (for clustering)  └─ Trajectory plan  │
+│                                                                     │
+│   [PCIe x8 Slots × 6]              [PCIe Slot × 1: Tech Module]   │
+│                                                                     │
+└─────────────────────────────────────────────────────────────────────┘
+
+* Input Power Board is not implemented in the prototype.
+  The prototype is powered directly from a 24V PSU.
+```
+
+### 3.2 Data Flow: Control Loop
+
+Every control cycle (target: 20 µs / 50 kHz):
+
+```
+Step 1: FPGA triggers ADC conversion on the Blade
+            │
+Step 2: STM32G431 (on Blade) samples 3 phase currents
+            │
+Step 3: ADC data is sent via SPI to the FPGA          ← ~400 ns
+            │
+Step 4: FPGA decodes quadrature encoders (parallel)   ← 1-2 clock cycles
+            │
+Step 5: FPGA writes currents + positions directly
+        into MCU registers (via data bus)              ← no CPU overhead
+            │
+Step 6: MCU (STM32H7) executes:
+        - Clarke/Park transforms
+        - PID current regulators (FOC)
+        - Inverse kinematics
+        - Trajectory interpolation
+            │
+Step 7: MCU writes PWM duty cycles directly
+        into FPGA registers (via data bus)             ← no CPU overhead
+            │
+Step 8: FPGA generates 6 PWM signals with
+        hardware dead-time insertion
+            │
+Step 9: PWM signals reach gate drivers on the Blade
+            │
+Step 10: Motor responds. Cycle repeats.
+```
+
+Key architectural advantage: Steps 3, 4, 5, and 7 happen with **zero CPU
+involvement**. The FPGA handles all signal acquisition, decoding, and
+routing in parallel, while the MCU focuses purely on math. Adding more
+sensors or encoders does not increase MCU load or introduce jitter.
+
+> **Current prototype status:** The full control chain has been validated
+> at 20 kHz using development boards (Tang Nano 9K as FPGA, STM32H7 Nucleo
+> as MCU) connected via SPI. The FPGA acts as SPI master and triggers the
+> MCU via EXTI interrupt on each frame. The target architecture (direct
+> register bus, 50 kHz) will be implemented on the motherboard.
+
+### 3.3 Power Distribution
+
+```
+[External PSU: 8-60V DC]
+        │
+[Input Power Board*] ── filtering, protection, regulation
+        │
+[Motherboard Power Rail]
+        ├──→ Blade slots (Vbus passthrough to motor drivers)
+        ├──→ 12V DC/DC → FPGA, gate driver logic supply
+        ├──→ 5V  DC/DC → MCU, digital logic
+        ├──→ 3.3V LDO  → MCU core, FPGA I/O banks
+        └──→ Technologist Module slot (5V or 3.3V selectable)
+
+Each Blade has its own on-board power regulation:
+[Vbus from Motherboard]
+        ├──→ 12V DC/DC (TPS54360B) → gate driver bootstrap
+        ├──→ 5V  LDO  (LM7805)    → STM32G431, RS-485
+        └──→ 3.3V LDO (TLV1117)   → logic, analog reference
+
+* Not implemented in prototype. Robot is powered directly at 24V.
 ```
 
 ---
 
-## The Four Layers
+## 4. Electronics Architecture
 
-### logic/ — Pure Algorithms
+### 4.1 Motherboard
 
-**Language:** C++
-**Knows about:** math, control theory, robotics
-**Does NOT know about:** registers, DMA, SPI, what MCU is used
+The Motherboard is the central hub. It hosts:
 
-This layer contains the entire control cascade:
+- **MCU:** STM32H7A3 — the brain of the robot.
+- **FPGA:** Lattice ECP5 (LFE5U-45F) — the signal engine.
+- **PCIe x8 slots** (×6) for Power Blades.
+- **PCIe x8 slot** (×1) for the Technologist Module.
+- **Power input terminals** from the Input Power Board (or directly from PSU).
+- **Clock synchronization output** on the Technologist Module connector.
+
+> **Important:** The PCIe x8 connector (98-pin, part: 10018784-10202TLF) is
+> used **only as a physical/mechanical connector**. The PCIe protocol is
+> **not** used. The pinout is custom-defined for this project.
+
+### 4.2 MCU: STM32H7A3
+
+The MCU is the high-level computational center. Its responsibilities:
+
+- **FOC (Field-Oriented Control)** — Clarke/Park transforms, PID regulators.
+- **Inverse kinematics** — converting Cartesian coordinates to joint angles.
+- **Technologist Module API** — receiving high-level commands (e.g., "move to
+  point X,Y,Z") and decomposing them into per-axis motor control tasks.
+- **Trajectory planning** — interpolation, acceleration profiles.
+- **System state machine** — initialization, calibration, operation, error
+  handling.
+
+The MCU does **not** directly read encoders or generate PWM. All signal I/O
+is handled by the FPGA and mapped into MCU memory via the data bus.
+
+### 4.3 FPGA: Lattice ECP5 (LFE5U-45F)
+
+The FPGA is the real-time signal engine. Its responsibilities:
+
+- **PWM generation** — center-aligned PWM at the duty cycle specified by
+  the MCU. All channels are generated in parallel.
+- **Hardware dead-time insertion** — prevents shoot-through on half-bridges.
+  This is a critical safety function implemented in hardware, not software.
+- **Quadrature encoder decoding** — reads and decodes encoder signals for
+  all axes simultaneously, in parallel, with glitch filtering.
+- **ADC data reception** — receives SPI data from the STM32G431 ADC on each
+  Blade and places it directly into MCU-accessible registers.
+- **Hardware clock synchronization** — generates a synchronization clock
+  signal for multi-robot clustering. This clock is routed to the
+  Technologist Module connector.
+
+The FPGA communicates with the MCU via a direct data bus that allows
+register-level read/write access in both directions.
+
+### 4.4 MCU ↔ FPGA Communication
+
+The MCU and FPGA are connected via a parallel data bus that enables direct
+register access:
+
+- The **MCU writes** PWM duty cycles and frequencies directly into FPGA
+  registers. No serialization, no protocol overhead.
+- The **FPGA writes** encoder positions and ADC values directly into
+  MCU-accessible memory. No interrupt handling, no polling.
+
+This architecture eliminates the communication bottleneck that typically
+limits multi-axis servo systems. Adding a new axis (a new Blade with
+motor and encoders) does not increase the MCU's I/O workload — it only
+adds more math to compute.
+
+> The specific bus interface (FMC, FSMC, or custom parallel bus) will be
+> finalized during motherboard development.
+
+### 4.5 Power Blade (Axis Channel)
+
+The Power Blade is a modular motor driver on a PCB with a PCIe x8 edge
+connector. Each Blade drives one motor (one axis).
+
+**Specifications:**
+
+| Parameter                | Value                              |
+|--------------------------|------------------------------------|
+| Connector                | PCIe x8 (98-pin, physical only)    |
+| Rated power              | 150–300 W (continuous)             |
+| Peak power (by design)   | 1200 W                             |
+| Switching frequency       | 50 kHz                             |
+| MOSFETs                  | NTMFS3D5N08XT1G (80V, 3mΩ, 23nC)  |
+| Gate drivers             | IRS21867S (4A peak, 600V)          |
+| Current sensing          | INA240A1DR (×3, 20 V/V gain)       |
+| Shunt resistors          | 5mΩ, 3W, 1%                       |
+| On-board ADC             | STM32G431RBT6                      |
+| Communication to FPGA    | RS-485 (SN65HVD75DR), SPI          |
+
+**Why STM32G431 as ADC?**
+
+A dedicated ADC IC would be cheaper per channel but would require more
+external circuitry. The STM32G431 provides three 12-bit ADCs with hardware
+synchronization, all in a single $1.5 package. It also runs at 170 MHz,
+which allows it to handle the ADC-to-SPI pipeline with a latency of
+approximately 400 ns and zero CPU intervention on the main MCU. In the
+future, the G431 will also monitor Blade health (temperature, voltage,
+fault conditions).
+
+**Thermal note:** At the nominal operating point (24V, 4A), total
+conduction losses across all 6 MOSFETs are under 0.3W. Even at the
+maximum design current (10A), losses remain under 3W. The SuperSO8
+package dissipates this without a heatsink. Active cooling is not required.
+
+> Full component list and selection rationale: see `hardware/docs/components.md`
+
+### 4.6 Technologist Module
+
+The Technologist Module is the user-facing control interface. It plugs into
+a dedicated PCIe slot on the Motherboard and communicates with the MCU via
+a minimal interface:
 
 ```
-4_runtime    (main loop)    commands, state machine, modes
-    │
-3_trajectory (100 Hz)       path planning, S-curves
-    │
-2_kinematics (100 Hz)       joint angles ↔ Cartesian coordinates
-    │
-1_servo      (1 kHz)        position/velocity PID + extensions
-    │
-0_foc        (50 kHz)       current control, Clarke/Park, SVPWM
-    │
-    ▼
-abstract/hw_contract        "give me currents, take my PWM"
-```
-
-Each level only calls the level below it. FOC does not know about
-kinematics. Trajectory does not know about PWM registers.
-
-The `safety/` module is special — it sits between `1_servo/` output and
-`0_foc/` input as an unbypassable barrier. See [Safety](#safety) below.
-
-**Numbering convention:** `0_` is the fastest loop (closest to hardware),
-`4_` is the slowest (closest to the user). This makes the cascade
-hierarchy immediately visible in any file listing.
+Pin allocation (conceptual):
+- Power:  VCC (5V or 3.3V)
+- Ground: GND
+- Data:   TX (commands from module → MCU)
+- Data:   RX (feedback from MCU → module)
+- Clock:  SYNC (hardware synchronization clock from FPGA)
 
 ```
-0_foc        50 kHz    current control
-1_servo       1 kHz    position/velocity control
-2_kinematics  100 Hz   joint-to-cartesian transforms
-3_trajectory  100 Hz   path planning
-4_runtime     main()   state machine, commands, modes
-```
 
-### utility/ — Reusable Building Blocks
+From the Technologist Module's perspective, the entire robot is a **black box** with a simple API:
 
-**Language:** C or C++
+- Send: `MOVE_TO(x, y, z, speed)`
+- Send: `SET_JOINT(axis, angle)`
+- Receive: `POSITION(x, y, z)`
+- Receive: `STATUS(state, error_code)`
 
-**Rules:**
-- Pure math and utilities — no hardware, no state machines
-- Each block is self-contained with its own `.h` and `.c`/`.cpp`
-- ONLY placed in `utility/` if used by **more than one** module in `logic/`
-- If used by only one module — keep it inside that module
+The Technologist Module has **no access** to the internal control loop,
+FOC parameters, or motor-level commands. It cannot modify the closed-loop
+control algorithms.
 
-**Grouping:**
-- `math/` — linear algebra, quaternions, splines
-- `control/` — PID, filters, observers
-- `signal/` — FFT, spectral analysis
-- `utils/` — ring buffers, CRC, data structures
+The module is also directly connected to the end-effector (tool). It
+controls the tool independently of the robot's positioning system.
 
-### abstract/ — Hardware Contract
+**Key design intent:** Swapping the Technologist Module changes the robot's
+task. A milling module commands precise paths and controls a spindle.
+A welding module commands different paths and controls a welder. The robot
+itself does not change. This is the "hot-swap" in HSPS.
 
-**Language:** C (with `extern "C"` guards for C++ compatibility)
-**Contains:** only header files
-**Changes:** almost never
+> The physical communication protocol (UART, SPI, or custom) and the
+> command format will be finalized during Technologist Module development.
 
-This layer defines **what** the hardware must provide, not **how**.
+### 4.7 Input Power Board
 
-`hw_contract.h` is a documentation file that lists every function
-`driver/hw_impl.h` must implement:
+The Input Power Board sits between the external power supply and the
+Motherboard. Its purpose is to protect and condition the incoming power:
 
-```c
-// hw_contract.h
-//
-// Every driver/ MUST provide hw_impl.h with these functions:
-//
-// --- Motor I/O ---
-//   static inline phase_t  hw_read_currents(void);
-//   static inline rotor_t  hw_read_rotor(uint8_t axis);
-//   static inline void     hw_write_pwm(uint8_t axis, phase_t duty);
-//
-// --- Gate control ---
-//   static inline void     hw_enable_gate(uint8_t axis);
-//   static inline void     hw_disable_gate(uint8_t axis);
-//
-// --- Math acceleration ---
-//   static inline void     hw_sincos(float angle, float *s, float *c);
-//
-// --- Timing ---
-//   static inline uint32_t hw_micros(void);
-//
-// --- FPGA register access ---
-//   static inline void     hw_fpga_write(uint16_t addr, uint32_t value);
-//   static inline uint32_t hw_fpga_read(uint16_t addr);
-```
+- Input voltage filtering (EMI suppression)
+- Overvoltage and overcurrent protection (disconnect on fault)
+- Voltage regulation/stabilization for noisy or unstable sources
+- Accepted input range: 8V to 60V DC
 
-Note: `hw_fpga_write` / `hw_fpga_read` are the **abstracted register
-interface**. Logic calls them without knowing whether the transport is
-SPI, FMC, or any future bus. See [FPGA Communication](#fpga-communication)
-below.
-
-### driver/ — Chip-Specific Implementation
-
-**Language:** C + ASM
-
-**Knows about:** everything hardware — registers, DMA, pin numbers, clock trees
-**Scope:** when switching to a different MCU, **only this layer is rewritten**
-
-`hw_impl.h` is the bridge file. It implements every function from
-`hw_contract.h` as `static inline`, so the compiler inlines them directly
-into the calling code. **Zero function call overhead.**
+> **Not implemented in the prototype.** The prototype connects a regulated
+> 24V PSU directly to the Motherboard. The Input Power Board will be
+> developed for the production version after the core concept is validated.
 
 ---
 
-## FPGA Communication
+## 5. Firmware Architecture
 
-### The Problem
+### 5.1 FPGA Modules
 
-The MCU and FPGA exchange data through a shared register space. The FPGA
-exposes registers for:
+The FPGA design is written in SystemVerilog and consists of independent,
+parallel modules:
 
-- PWM duty cycles (MCU writes)
-- Encoder positions (MCU reads)
-- ADC current values (MCU reads)
-- Configuration (MCU writes)
+| Module                | Function                                           |
+|-----------------------|----------------------------------------------------|
+| `system_storage`      | Central register file (CSR). Shared memory between  |
+|                       | FPGA and MCU for all axis data.                    |
+| `pwm_generator`       | Center-aligned PWM generation for FOC.             |
+| `deadtime`            | Hardware dead-time insertion. Prevents shoot-through|
+|                       | on half-bridge MOSFETs. Cannot be bypassed by SW.  |
+| `quadrature_decoder`  | Decodes ABZ encoder signals with glitch filtering. |
+| `spi_master`          | Configurable-width SPI master for MCU and ADC      |
+|                       | communication.                                     |
+| `top`                 | Top-level integration: 3-axis instantiation,       |
+|                       | exchange FSM, tick timer.                          |
 
-Today, this register access happens over **SPI** — the FPGA (as master)
-sends full-duplex frames containing register snapshots and receives
-computed outputs. Tomorrow, when the motherboard is manufactured with a
-proper bus, the FPGA will appear as a **memory-mapped peripheral** via
-FMC, and register access will be a simple pointer dereference.
+All modules run in parallel. Adding a new axis means instantiating another
+set of modules — no impact on existing axes' timing.
 
-### The Solution: Transport Abstraction Inside driver/
+### 5.2 MCU Firmware
 
-The abstraction happens **inside** `driver/fpga_bus/`, not in `abstract/`.
-Why? Because both SPI and FMC are chip-specific — they both live in the
-driver layer.
+> **Status:** The FOC algorithm is implemented and validated at 20 kHz on
+> development boards (Tang Nano 9K + STM32H7 Nucleo). The target frequency
+> of 50 kHz will be achieved on the final motherboard with FMC bus.
+
+The MCU firmware runs on the STM32H7A3 and implements:
+
+- **FOC (Field-Oriented Control):** Clarke/Park transforms, PI current
+  regulators in the d-q reference frame. **Implemented and tested.**
+- **SVPWM modulation:** Space-vector PWM with min-max injection for
+  optimal DC bus utilization. **Implemented and tested.**
+- **Position/velocity control loop:** Outer loop using encoder feedback.
+  *Planned.*
+- **Inverse kinematics solver:** Converts Cartesian commands from the
+  Technologist Module into joint-space targets. *Planned.*
+- **Technologist Module communication handler:** Parses incoming commands,
+  queues them (FIFO), executes in order, sends back position feedback.
+  *Planned.*
+- **State machine:** Manages robot states (boot → calibration → idle →
+  moving → error → emergency stop). *Planned.*
+
+### 5.3 Control Loop Timing
+
+Target control loop period: **20 µs (50 kHz)**.
 
 ```
-driver/fpga_bus/
-├── fpga_transport.h       # common interface
-├── fpga_spi.c            # SPI implementation (current)
-└── fpga_fmc.c            # FMC implementation (future)
+Budget breakdown (target):
+
+ADC sampling + SPI transfer:     ~0.5 µs
+FPGA encoder decoding:           ~0.02 µs (1-2 FPGA clock cycles)
+FPGA → MCU register write:       ~0.1 µs
+MCU: FOC computation:            ~5-10 µs (estimated)
+MCU → FPGA register write:       ~0.1 µs
+FPGA PWM update:                 ~0.02 µs
+────────────────────────────────────────────
+Total estimated:                 ~6-11 µs
+Margin:                          ~9-14 µs
 ```
 
-```c
-// fpga_transport.h
+This timing budget is achievable because signal acquisition (steps 1-3)
+and signal generation (step 6) are handled entirely by the FPGA in
+parallel with MCU computation. The MCU only performs math.
 
-#pragma once
-#include <stdint.h>
+**Why this matters for precision:**
 
-// Only ONE of these is compiled (selected in CMakeLists.txt)
-void     fpga_transport_init(void);
-void     fpga_write_reg(uint16_t addr, uint32_t value);
-uint32_t fpga_read_reg(uint16_t addr);
-```
+Two encoders per axis (one on the motor shaft, one on the output after
+the reducer) are read simultaneously by the FPGA. At 50 kHz, the robot
+corrects its position every 20 µs. This high update rate, combined with
+dual-encoder feedback, compensates for reducer backlash and mechanical
+imperfections in software — reducing the need for expensive, high-precision
+mechanical components.
 
-```c
-// fpga_spi.c — current implementation (FPGA = SPI master)
-
-#include "fpga_transport.h"
-#include "mcu/spi.h"
-
-// The FPGA drives CS and SCK. The MCU configures SPI as slave with DMA.
-// On each FPGA sync event, a full-duplex frame is exchanged:
-//   FPGA → MCU: register snapshot (encoder positions, ADC currents)
-//   MCU → FPGA: computed outputs (PWM duties, enable flags)
-//
-// The transport layer unpacks the received frame into a register cache,
-// and packs the outgoing register values into the TX frame.
-
-static uint32_t reg_cache_rx[FPGA_REG_COUNT];  // received from FPGA
-static uint32_t reg_cache_tx[FPGA_REG_COUNT];  // to be sent to FPGA
-
-void fpga_transport_init(void) {
-    spi_slave_init();  // configure SPI as slave + DMA + EXTI on CS
-}
-
-uint32_t fpga_read_reg(uint16_t addr) {
-    return reg_cache_rx[addr];  // read from local cache (updated by DMA ISR)
-}
-
-void fpga_write_reg(uint16_t addr, uint32_t value) {
-    reg_cache_tx[addr] = value;  // write to local cache (sent on next frame)
-}
-```
-
-```c
-// fpga_fmc.c — future implementation
-
-#include "fpga_transport.h"
-
-#define FPGA_BASE_ADDR  0x60000000  // FMC bank 1
-
-static volatile uint32_t *fpga_mem =
-    (volatile uint32_t *)FPGA_BASE_ADDR;
-
-void fpga_transport_init(void) {
-    fmc_init();  // configure FMC peripheral
-}
-
-void fpga_write_reg(uint16_t addr, uint32_t value) {
-    fpga_mem[addr] = value;  // single bus write, ~10ns
-}
-
-uint32_t fpga_read_reg(uint16_t addr) {
-    return fpga_mem[addr];   // single bus read, ~10ns
-}
-```
-
-### How hw_impl.h Uses It
-
-```c
-// driver/hw_impl.h
-
-#include "fpga_bus/fpga_transport.h"
-#include "config.h"
-
-static inline phase_t hw_read_currents(void) {
-    return (phase_t){
-        .a = (float)(int16_t)fpga_read_reg(FPGA_REG_CURRENT_A) * CURRENT_SCALE,
-        .b = (float)(int16_t)fpga_read_reg(FPGA_REG_CURRENT_B) * CURRENT_SCALE,
-        .c = (float)(int16_t)fpga_read_reg(FPGA_REG_CURRENT_C) * CURRENT_SCALE,
-    };
-}
-
-static inline void hw_write_pwm(uint8_t axis, phase_t duty) {
-    fpga_write_reg(FPGA_REG_PWM_A + axis * FPGA_AXIS_STRIDE,
-                   (uint32_t)(duty.a * TIM_PERIOD));
-    fpga_write_reg(FPGA_REG_PWM_B + axis * FPGA_AXIS_STRIDE,
-                   (uint32_t)(duty.b * TIM_PERIOD));
-    fpga_write_reg(FPGA_REG_PWM_C + axis * FPGA_AXIS_STRIDE,
-                   (uint32_t)(duty.c * TIM_PERIOD));
-}
-```
-
-### Switching Transport
-
-```cmake
-# CMakeLists.txt
-option(FPGA_TRANSPORT_SPI "Use SPI for FPGA communication" ON)
-option(FPGA_TRANSPORT_FMC "Use FMC for FPGA communication" OFF)
-
-if(FPGA_TRANSPORT_SPI)
-    target_sources(firmware PRIVATE driver/fpga_bus/fpga_spi.c)
-elseif(FPGA_TRANSPORT_FMC)
-    target_sources(firmware PRIVATE driver/fpga_bus/fpga_fmc.c)
-endif()
-```
-
-Switching from SPI to FMC:
-1. Change one CMake option
-2. Rebuild
-
-`logic/`, `utility/`, `abstract/` — **untouched**.
-Even `hw_impl.h` — **untouched**. Only the transport file changes.
-
-### Performance Comparison
-
-| Transport | Write latency | Read latency | FOC overhead (6 reg ops) |
-|-----------|--------------|-------------|--------------------------|
-| SPI 20MHz | ~2 µs        | ~3 µs       | ~15 µs                   |
-| FMC       | ~10 ns       | ~10 ns      | ~60 ns                   |
-
-With FMC, FPGA register access becomes essentially free — just a memory
-dereference.
+Scaling to 100 kHz (10 µs) is architecturally possible by using a faster
+MCU or offloading parts of the FOC computation to the FPGA, with no
+changes to the system architecture.
 
 ---
 
-## How It Works
+## 6. Mechanical Architecture
 
-### The Bridge: hw_impl.h
+### 6.1 Kinematic Configuration
 
-This single file connects portable algorithms to real hardware:
+The robot is a serial-link articulated manipulator. The prototype
+implements 3 axes (for concept validation), with the architecture designed
+to scale to 6 axes.
 
-```c
-// driver/hw_impl.h
-
-static inline phase_t hw_read_currents(void) {
-    // logic/ calls this. It has no idea this goes through FPGA registers.
-    // With SPI: ~3µs. With FMC: ~10ns. Logic doesn't care.
-    return (phase_t){
-        .a = (float)(int16_t)fpga_read_reg(FPGA_REG_CURRENT_A) * CURRENT_SCALE,
-        .b = (float)(int16_t)fpga_read_reg(FPGA_REG_CURRENT_B) * CURRENT_SCALE,
-        .c = (float)(int16_t)fpga_read_reg(FPGA_REG_CURRENT_C) * CURRENT_SCALE,
-    };
-}
-```
-
-The compiler inlines everything. With FMC, the final assembly is just
-three memory loads and three multiplies. **No function calls. No
-indirection. No overhead from the architecture.**
-
-### main.cpp — Entry Point and Configuration
-
-```cpp
-#include "hw_impl.h"
-#include "logic/0_foc/foc.hpp"
-#include "logic/1_servo/servo.hpp"
-#include "logic/1_servo/extensions/damping/damping.hpp"
-#include "logic/1_servo/extensions/friction/friction.hpp"
-
-foc::FOC foc_instance;
-
-// Compile-time servo chain — zero overhead
-auto servo_chain = ServoChain{
-    Damping{.freq = 45.0f, .gain = 0.3f},
-    FrictionComp{.coulomb = 0.1f},
-};
-
-int main(void) {
-    hw_binding_init();          // clocks, pins, DMA, FPGA transport
-    foc_instance.init(PID_KP_D, PID_KI_D, PID_KP_Q, PID_KI_Q);
-    servo_init();
-    hw_enable_gate(0);
-
-    while (1) {
-        runtime_spin();         // state machine, technologist commands
-    }
-}
-```
-
-**main.cpp is the configuration file.** To see what the robot does, read
-main.cpp. To change what the robot does, edit main.cpp.
-
-### Interrupt-Driven Cascade
-
-The FPGA controls all timing. It triggers the MCU at the FOC rate
-(50 kHz) via a dedicated interrupt line. The MCU never uses its own
-timers for the control loop — this guarantees that ADC sampling, FOC
-computation, and PWM update are perfectly synchronized.
-
-```c
-// driver/isr/foc_isr.c — 50 kHz, triggered by FPGA
-extern "C" void FPGA_SYNC_IRQHandler(void) {
-    EXTI->PR1 = FPGA_SYNC_PIN;         // clear interrupt flag
-    foc_instance.step();                // reads FPGA regs, computes, writes FPGA regs
-}
-
-// driver/isr/servo_isr.c — 1 kHz, decimated from FOC rate
-// Called every N-th FOC cycle (e.g., every 50th = 1 kHz)
-static uint32_t servo_divider = 0;
-if (++servo_divider >= 50) {
-    servo_divider = 0;
-    servo_step(&axis);                  // PID + extensions + guardian
-}
-```
-
-The servo loop runs at 1 kHz by decimating the FOC interrupt — no
-separate timer needed. This keeps the servo perfectly phase-locked
-to the FOC loop and avoids interrupt priority conflicts.
-
-### Data Flow Per Control Cycle
+The mechanical structure consists of modular, standardized elements
+connected via a 20mm shaft interface. Each joint is driven by a BLDC motor
+through a balanced cycloidal reducer and a belt final stage.
 
 ```
-FPGA (parallel, continuous):
-  ├─ Decodes encoders          → writes to FPGA registers
-  ├─ Receives ADC via SPI      → writes to FPGA registers (from G4s on Blades)
-  └─ Generates PWM             ← reads from FPGA registers
-
-MCU (interrupt-driven, 50 kHz):
-  1. FPGA triggers sync interrupt
-  2. foc_step() runs:
-     a. hw_read_currents()     → reads FPGA registers (via SPI or FMC)
-     b. hw_read_rotor()        → reads FPGA registers
-     c. Clarke/Park transforms → pure math
-     d. PID on Id, Iq          → pure math (utility/control/pid/)
-     e. Inverse Park + SVPWM   → pure math
-     f. hw_write_pwm()         → writes FPGA registers
-  3. Return from interrupt
-
-MCU (decimated from FOC, 1 kHz):
-  1. Every 50th FOC cycle:
-  2. servo_step() runs:
-     a. Read position           → hw_read_rotor()
-     b. PID position loop       → utility/control/pid/
-     c. Extension pipeline      → damping, friction, etc. (compile-time)
-     d. Guardian safety check   → safety/guardian
-     e. Set torque target       → foc_instance.set_torque()
-  3. Return from interrupt
-
-MCU (main loop, continuous):
-  1. runtime_spin()
-     a. Check technologist commands  → protocol/
-     b. Update state machine         → state_machine
-     c. Run trajectory planner       → 3_trajectory/
-     d. Run kinematics               → 2_kinematics/
+[Base] → [Slew Drive: Axis 1 (rotation)]
+              → [Cabin]
+                   → [Shoulder Module: Axis 2 (pitch)]
+                        → [Shoulder Module: Axis 3 (pitch)]
+                             → [End Effector / Tool]
 ```
+
+### 6.2 Slew Drive (Rotary Support)
+
+The slew drive provides Axis 1 rotation. It consists of three 3D-printed
+parts:
+
+- **Stator:** A circular base with bolt holes for mounting to the base.
+  It has an outer wall and an inner wall forming a rectangular channel
+  (raceway) in which bearings ride.
+- **Rotor:** A ring that fits inside the stator bore with finger
+  protrusions around its circumference. Bearings are pressed onto the
+  fingers and ride in the stator channel.
+- **Cover:** A ring that bolts onto the stator, closing the channel and
+  constraining the bearings axially.
+
+The assembly creates a rigid constraint that allows free rotation while
+preventing tilting (nodding) of the robot. The stator raceway is expected
+to wear over time with 3D-printed materials and will be reinforced in
+future iterations.
+
+### 6.3 Cabin
+
+The cabin connects the slew drive (Axis 1) to the first shoulder joint
+(Axis 2). Its design is inspired by industrial heavy equipment
+(excavators), where the rotation axis is offset from the arm attachment
+point:
+
+- The arm attaches to one side via two bearing ears forming a U-shaped
+  yoke.
+- The opposite side houses the motor and reducer for Axis 2, acting as a
+  counterweight.
+- This layout eliminates the tuning-fork resonance effect, increases
+  structural rigidity, and partially balances the arm when fully extended.
+
+### 6.4 Shoulder Module
+
+The shoulder module is a standardized structural link. It consists of:
+
+- **Base end:** Two ears that clamp onto a 20mm shaft using hex nuts and
+  bolts (6 bolt points per ear), providing a rigid connection.
+- **Truss section:** A lightweight lattice/truss structure for
+  stiffness-to-weight optimization. Walls are 5mm+ PETG with 100% infill.
+  Four 8mm steel rods run inside the truss as internal reinforcement,
+  creating a composite structure with rigidity comparable to aluminum
+  tube of similar cross-section.
+- **Head end:** A U-shaped yoke with bearing bores for the next joint's
+  shaft, plus mounting points for the Backpack module.
+
+Multiple shoulder modules can be chained using the same 20mm shaft
+interface to extend the arm. The prototype uses a long module and a short
+module.
+
+### 6.5 Backpack (Motor + Reducer Mount)
+
+The Backpack is a box-shaped module that mounts underneath the shoulder
+module's head, attaching to the same interface used for the yoke. It
+serves multiple purposes:
+
+- Houses the motor and reducer for the next joint.
+- Stiffens the yoke ears, eliminating tuning-fork resonance.
+- Shifts the center of mass closer to the previous joint axis, reducing
+  dynamic loads.
+- Aligns the reducer output shaft and belt drive with the joint axis.
+
+### 6.6 Balanced Cycloidal Reducer
+
+The reducer is a custom-designed, 3D-printable balanced cycloidal drive.
+
+**Specifications:**
+
+| Parameter                    | Value                               |
+|------------------------------|-------------------------------------|
+| Reduction per stage          | 10:1                                |
+| Stages in prototype          | 2 (= 100:1)                        |
+| Maximum stages (by volume)   | 3 (= 1000:1)                       |
+| Belt final stage             | 1:3                                 |
+| Total reduction (prototype)  | 300:1                               |
+| Form factor                  | Fits in the palm of a hand          |
+
+The high reduction ratio is necessary because the design uses high-RPM,
+low-torque BLDC motors. The architecture allows any motor to be used — if
+high-torque motors are chosen, the reducer can be simplified or removed.
+
+**Key discovery during development:**
+
+For a rigidly connected, balanced (counter-rotating) dual-disc cycloidal
+drive, the standard clearance formula does not apply. The correct formula
+for the hole diameter in the cycloidal discs is:
+
+```
+Hole_Diameter = Pin_Diameter + (4 × Eccentricity)
+```
+
+This is **double** the clearance required for single-disc or independently
+suspended designs. This finding was validated through physical testing.
+
+> Detailed development history and the reasoning behind this formula can
+> be found in the [Development Log](DEVLOG.md).
+
+### 6.7 Base
+
+The prototype base is a heavy concrete block. An earlier plan to 3D-print
+a plastic base was abandoned because it would have required over 2 kg of
+plastic while still being too light to provide adequate stability. The
+concrete block is cheap, heavy, and meets all requirements.
 
 ---
 
-## Safety
+## 7. The Technologist Module: Design Philosophy
 
-Safety is implemented as three independent, layered barriers:
+The Technologist Module is the most architecturally significant part of
+this project. It is what differentiates this robot from others at a
+fundamental level.
 
-```
-    Extensions output (may contain bugs)
-              │
-    ╔═════════▼═══════════╗
-    ║  GUARDIAN (software) ║
-    ║  • NaN check        ║
-    ║  • Torque limits    ║
-    ║  • Velocity limits  ║
-    ║  • Position limits  ║
-    ║  • Following error  ║
-    ║  • Watchdog         ║
-    ╚═════════╤═══════════╝
-              │ (clean, validated torque)
-              ▼
-    FOC overcurrent (software limit in 0_foc/)
-              │
-              ▼
-    Hardware comparator (analog, on Power Blade)
-              │
-              ▼
-    FPGA dead-time (hardware, cannot be bypassed by software)
-```
+**The problem it solves:**
 
-**Guardian is NEVER disabled.** There is no `#if FEATURE_SAFETY`.
-There is no configuration option to turn it off. It is always compiled,
-always runs, always checks.
+Most robotic arms tightly couple the control software with the robot
+hardware. Changing the robot's task means rewriting code, reconfiguring
+the controller, and often physically modifying the system. This makes
+robots expensive to deploy and inflexible in practice.
 
-Even if all software fails, the hardware comparator on the Power Blade
-will cut power to the motor if current exceeds the absolute maximum.
-Even if the comparator fails, the FPGA dead-time prevents shoot-through.
+**The solution:**
 
----
+The Technologist Module separates *what the robot does* from *how the
+robot moves*. The robot's internal control system (FOC, kinematics,
+trajectory planning) is a sealed black box. The Technologist Module
+communicates with this box through a simple, high-level API.
 
-## How to Extend
+**What this enables:**
 
-### Adding a Servo Extension
+- **Tool independence:** The module controls the tool directly. The robot
+  only positions it. Swapping tools means swapping modules.
+- **Protocol independence:** The module can communicate with the outside
+  world via any interface — Ethernet, EtherCAT, USB, CAN, Wi-Fi, or
+  simply execute a pre-programmed sequence from flash memory. The robot
+  does not care.
+- **Rapid deployment:** A new application requires designing only a small
+  PCB with a microcontroller and a PCIe connector. The robot, its
+  firmware, and its calibration remain untouched.
+- **Clustering:** Multiple robots can be synchronized via the hardware
+  clock signal exposed on the Technologist Module connector. This enables
+  multi-robot cooperative tasks (e.g., holding a workpiece with one robot
+  while another machines it).
 
-**You need to know:** how to write a struct with a `step()` method.
-**You do NOT need to know:** FOC, registers, FPGA, interrupts, DMA.
+**Physical form:**
 
-**Step 1:** Create your extension
-
-```
-logic/1_servo/extensions/my_feature/
-└── my_feature.hpp
-```
-
-```cpp
-#pragma once
-#include "abstract/types.h"
-
-struct MyFeature {
-    float my_param;
-
-    float step(float torque, Axis& axis) {
-        return torque + my_param * axis.velocity;
-    }
-};
-```
-
-**Step 2:** Add one line to `main.cpp`
-
-```cpp
-#include "logic/1_servo/extensions/my_feature/my_feature.hpp"
-
-auto servo_chain = ServoChain{
-    Damping{.freq = 45.0f, .gain = 0.3f},
-    MyFeature{.my_param = 0.5f},             // ← add this
-};
-```
-
-**Step 3:** Build. Done.
-
-The compiler inlines `step()` directly into the servo loop. No function
-pointers. No vtables. Identical performance to hand-written code.
-
-To remove the feature, delete the line from `servo_chain`. The compiler
-eliminates all dead code. Zero bytes remain in the binary.
-
-### Adding a New Operating Mode
-
-**Step 1:** Create mode directory
-
-```
-logic/4_runtime/modes/my_mode/
-├── my_mode.hpp
-└── my_mode.cpp
-```
-
-**Step 2:** Register in state machine
-
-```cpp
-// logic/4_runtime/state_machine.cpp
-case STATE_MY_MODE:
-    my_mode_step();
-    break;
-```
-
-**Step 3:** Add technologist command
-
-```cpp
-// logic/4_runtime/protocol/commands.cpp
-case CMD_START_MY_MODE:
-    state_machine_enter(STATE_MY_MODE);
-    break;
-```
-
-### Adding a New Sensor
-
-**Step 1:** Add FPGA register address to `driver/config.h`
-
-```c
-#define FPGA_REG_NEW_SENSOR   0x40
-```
-
-**Step 2:** Add inline reader to `driver/hw_impl.h`
-
-```c
-static inline float hw_read_new_sensor(void) {
-    return (float)(int16_t)fpga_read_reg(FPGA_REG_NEW_SENSOR) * SCALE;
-}
-```
-
-**Step 3:** Document in `abstract/hw_contract.h`
-
-```c
-//   static inline float hw_read_new_sensor(void);
-```
-
-**Step 4:** Call from `logic/` — done
-
-### Adding a Utility Block
-
-```
-utility/control/my_filter/
-├── my_filter.h
-└── my_filter.c
-```
-
-**Rule:** only move to `utility/` if used by more than one module in `logic/`.
-Otherwise keep it inside the module that uses it.
+A small PCB with a microcontroller, a PCIe edge connector, and
+(optionally) an external communication interface. It plugs into the
+dedicated slot on the Motherboard and is powered by it (5V or 3.3V).
 
 ---
 
-## How to Port to a New MCU
+## 8. Design Principles
 
-1. Rewrite `driver/` contents for the new chip
-2. Implement every function listed in `abstract/hw_contract.h`
-3. Provide `startup/`, `isr/`, `mcu/` for the new chip
-4. Provide `fpga_bus/` with the appropriate transport
-5. **Do not touch `logic/`, `utility/`, or `abstract/`**
+1. **The robot is a black box.** It moves a point in space from A to B.
+   Everything inside stays inside. Everything outside stays outside.
 
-```
-Changes:            driver/*          (rewrite)
-                    main.cpp          (adjust init)
+2. **Modularity over monolith.** Every subsystem — mechanical and
+   electronic — must be independently testable, replaceable, and
+   repairable. A Blade swap should take seconds. A shoulder module swap
+   should take minutes.
 
-Stays identical:    logic/*           (all algorithms)
-                    utility/*         (all building blocks)
-                    abstract/*        (the contract)
-```
+3. **Precision through speed, not mechanics.** Industrial robots achieve
+   precision through expensive, ultra-tight-tolerance mechanical
+   components. This robot achieves precision through a fast control loop
+   (50 kHz) with dual-encoder feedback, correcting mechanical
+   imperfections 50,000 times per second.
 
----
+4. **Infinite scalability (as a goal).** The architecture should allow
+   adding more axes, more sensors, and more robots without fundamental
+   redesign. The FPGA's parallel nature makes this feasible for I/O.
+   The standardized mechanical interfaces make this feasible for
+   structure.
 
-## Language Policy
+5. **Power agnosticism.** The robot should accept any DC power source
+   from 8V to 60V. If it can be deployed anywhere, it should be powered
+   from anywhere.
 
-| Layer      | Language | Why                                          |
-|------------|----------|----------------------------------------------|
-| logic/     | C++      | Templates for zero-overhead extensions        |
-| utility/   | C or C++ | Pure math, maximum compatibility              |
-| abstract/  | C        | Must be usable from both C and C++            |
-| driver/    | C + ASM  | Direct register access, CMSIS compatibility   |
-| main.cpp   | C++      | Uses C++ servo chain template                 |
+6. **Accessibility.** The robot must be buildable by anyone with a 3D
+   printer and common tools. The BOM cost should be comparable to a
+   power tool, not an automobile.
 
-C++ features used: `templates`, `constexpr`, `inline`, `namespaces`,
-`designated initializers`. No heap allocation. No exceptions. No RTTI.
+7. **Reusability.** Like good code, no part of the robot should be
+   single-purpose. The shoulder module is the same for every joint. The
+   Blade is the same for every axis. The reducer is the same at every
+   stage.
 
----
+8. **Motor agnosticism.** The control system must work with any BLDC
+   motor. The system should be able to characterize an unknown motor
+   and configure itself accordingly.
 
-## Build
+9. **The tool defines the task, not the robot.** Swapping the
+   Technologist Module and the end-effector changes the robot's purpose.
+   Today it mills. Tomorrow it welds. The robot itself does not change.
 
-```bash
-# Build with SPI transport (current)
-cmake -B build \
-    -DCMAKE_TOOLCHAIN_FILE=cmake/arm-gcc.cmake \
-    -DFPGA_TRANSPORT_SPI=ON
-cmake --build build
-
-# Build with FMC transport (future motherboard)
-cmake -B build \
-    -DCMAKE_TOOLCHAIN_FILE=cmake/arm-gcc.cmake \
-    -DFPGA_TRANSPORT_FMC=ON
-cmake --build build
-
-# Flash
-openocd -f target/stm32h7.cfg \
-    -c "program build/firmware.elf verify reset exit"
-```
+10. **Mechanics is necessary but not primary.** We cannot build a robot
+    from sticks, but we also must not rely solely on mechanical precision.
+    A $50,000 harmonic drive on a poorly controlled system is still a
+    poorly controlled system.
 
 ---
 
-## Architecture Diagram
+## 9. Target Specifications
 
-```
-main.cpp                     entry point + configuration
-  │
-  ▼
-logic/4_runtime  ◄────────── protocol/ (technologist module, SPI)
-  │ commands
-  ▼
-logic/3_trajectory
-  │ waypoints
-  ▼
-logic/2_kinematics
-  │ joint angles
-  ▼
-logic/1_servo    ◄────────── extensions/ (compile-time, zero overhead)
-  │ torque
-  ▼
-safety/guardian  ◄────────── ALWAYS ON — NaN, limits, watchdog
-  │ validated torque
-  ▼
-logic/0_foc
-  │ PWM duty
-  ▼
-abstract/hw_contract ◄────── driver/hw_impl.h (static inline)
-                                │
-                                ▼
-                         fpga_transport (SPI or FMC)
-                                │
-                                ▼
-                           FPGA registers
-                                │
-                     ┌──────────┼──────────┐
-                     ▼          ▼          ▼
-                   PWM      Encoders     ADC
-                     │          │          │
-                     ▼          ▼          ▼
-                  Motors    Encoders   Power Blades
-                                      (G4 ADC × 6)
-```
+| Parameter                     | Prototype (3-axis)    | Target (6-axis)      |
+|-------------------------------|-----------------------|----------------------|
+| Degrees of freedom            | 3                     | 6                    |
+| Control loop frequency        | 50 kHz (20 µs)        | 50–100 kHz           |
+| Input voltage                 | 24V DC                | 8–60V DC             |
+| Current per axis (nominal)    | 4 A                   | configurable         |
+| Current per axis (peak)       | 10 A                  | configurable         |
+| Power per axis (nominal)      | ~100 W                | ~150–300 W           |
+| Encoder resolution            | TBD                   | TBD                  |
+| Encoders per axis             | 2 (motor + output)    | 2 (motor + output)   |
+| Reducer ratio                 | 300:1 (100:1 + 1:3)   | up to 1000:1 + belt  |
+| Motor type                    | BLDC (any)            | BLDC (any)           |
+| Positioning accuracy (target) | < 0.1 mm (with cal.)  | < 0.05 mm (with cal.)|
+| Payload                       | TBD                   | TBD                  |
+| Reach                         | TBD                   | TBD                  |
+| Robot mass (estimated)        | TBD                   | TBD                  |
+| Electronics BOM (3-axis)      | ~$80–120 (estimated)  | TBD                  |
+| Frame material (prototype)    | PETG (3D-printed)     | Aluminum (milled)    |
+| Blade swap time               | Seconds               | Seconds              |
+| Technologist Module swap time | Seconds               | Seconds              |
 
 ---
 
-## FAQ
+## 10. Current Status and Roadmap
 
-**Q: Where do I put a new algorithm?**
-A: If it modifies servo torque → `logic/1_servo/extensions/`.
-If it is a new robot mode → `logic/4_runtime/modes/`.
-If it is reusable math → `utility/`.
+> For detailed week-by-week progress, see the [Development Log](DEVLOG.md).
 
-**Q: Can I write extensions in pure C?**
-A: Yes. Write a C function, call it from your C++ `step()` method.
-The struct wrapper is one method, one line.
+### Completed
 
-**Q: How do I add a sensor that the FPGA doesn't yet expose?**
-A: First add the sensor register in FPGA RTL. Then add one `fpga_read_reg`
-call in `driver/hw_impl.h`. Then call it from `logic/`.
+- [x] Core mechanical design (3-axis CAD)
+- [x] Balanced cycloidal reducer (designed, printed, assembled, tested)
+- [x] Shoulder modules (printed and assembled)
+- [x] Slew drive (printed and assembled)
+- [x] Power Blade schematic design
+- [x] Power Blade PCB layout and routing
+- [x] Component simulations (DC/DC, current amplifier, half-bridge)
+- [x] FPGA core (PWM generator, dead-time, encoder decoder, CSR, SPI master)
+- [x] ADC-to-SPI pipeline on STM32G431 (~400 ns latency)
+- [x] Gerber/BOM/CPL files generated
+- [x] PCBs ordered and received
+- [x] Power Blade power-on test (all voltages verified)
+- [x] FOC algorithm implementation on STM32H7 (Clarke, Park, PI, SVPWM)
+- [x] Full control chain validated: ADC → FPGA → MCU → FPGA → motor (20 kHz)
 
-**Q: What if SPI is too slow for 50 kHz FOC?**
-A: Switch to FMC transport — one CMake option. SPI at 20 MHz adds ~15 µs
-per FOC cycle (6 register operations). FMC reduces this to ~60 ns.
-The 20 µs budget accommodates SPI for prototyping.
+### In Progress
 
-**Q: How do I disable a feature?**
-A: Remove its line from `servo_chain` in `main.cpp`. Compiler eliminates
-all dead code. Zero bytes in binary, zero cycles at runtime.
+- [ ] Remaining mechanical assembly (shoulder fitting, belt tensioning)
+- [ ] Motor spinning on Power Blade (transitioning from dev boards)
+- [ ] Motherboard schematic design
 
-**Q: What guarantees safety?**
-A: Four independent layers:
-1. `safety/guardian` — software NaN/limit/watchdog checks
-2. FOC overcurrent — software current limit in `0_foc/`
-3. Hardware comparator — analog, on Power Blade, works if CPU hangs
-4. FPGA dead-time — hardware, prevents shoot-through unconditionally
+### Future
 
-**Q: Why does the FPGA control the timing instead of the MCU?**
-A: The FPGA owns the PWM generation. By triggering the MCU at the PWM
-center point, ADC sampling, FOC computation, and PWM update are
-inherently synchronized. No phase alignment issues, no missed samples.
-The MCU simply responds to each sync event from the FPGA.
+- [ ] Motherboard PCB design
+- [ ] Technologist Module prototype
+- [ ] Input Power Board
+- [ ] Position/velocity servo loop
+- [ ] Inverse kinematics
+- [ ] Multi-robot clustering
+- [ ] Calibration system (reference flat surface)
+- [ ] Aluminum version (self-manufactured)
 
-**Q: Why not use function pointers for the extension pipeline?**
-A: Servo loop runs at 1 kHz. With 100 extensions, indirect calls add
-~300 cycles (0.6 µs). C++ templates resolve at compile time — zero
-overhead, same binary as hand-written code.
+---
 
-**Q: Is this architecture original?**
-A: The principles (layered abstraction, compile-time polymorphism,
-hardware contracts) are well-established in embedded systems. The specific
-combination — FPGA co-processor with abstracted transport, C++ template
-extension pipeline, four-layer safety, hot-swap module architecture — is
-designed specifically for this robot and this use case.
+*Project started: May 27, 2025*
+*This document reflects the architecture as of the prototype development phase.*
+*For component details, see [components.md](hardware/docs/components.md).*
+*For development history, see [DEVLOG.md](DEVLOG.md).*

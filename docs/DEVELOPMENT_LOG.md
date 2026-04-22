@@ -614,3 +614,30 @@ Let's just remember what I wanted to finish from the start: CAD, PCB, and... fir
 **AND NOOOWW..** time to go to sleep.
 
 <Have a good night, good person! :> >
+
+### **2026-04-24: Yep, it's me again. And I'm not dead.**
+
+## Milestone
+*   **Docs:** Fixed the `architecture.md` file.
+*   **CAD:** Repaired the printer and printed the 60-tooth rollers; designed a motor holder; assembled the shoulder modules; printed and adjusted the actuator module; fixed the reducer models; developed a new 20:1 reducer and ordered materials for it; and finally, assembled and tested the rotary support.
+*   **PCB:** Tested all board systems (they work!) and updated the Gerber files.
+
+## Current Status
+*   **CAD:** It's been a sea of troubles, but I managed to get everything I listed above done.
+*   **PCB:** THE BOARDS WORK! ...well, with one tiny issue. I accidentally shorted a trace under a suppressor in the third half-bridge. A quick fix later, and everything is running smoothly. I've tested the DC/DC converters, spun a motor, and successfully programmed the microcontroller. The Gerbers are updated with the fix, so if you're brave enough, you can order them now.
+*   **Docs:** I accidentally deleted the old architecture file. When I finally noticed, I just fixed it. No further comments.
+
+## Next Steps
+*   **CAD:** Keep assembling all the parts.
+*   **Docs:** Write my thesis.
+
+## Comment
+This past month hasn't been the most exciting, I'll admit. There were no major milestone breakthroughs—just a whole lot of grinding. I've been assembling, printing, writing my thesis, and fixing one small issue after another. Sorry for the radio silence on GitHub, but I honestly didn't know what to write. It's not that things are bad, just that it's been a ton of little tasks—all hands-on work, spending money on bearings, shafts, and other hardware.
+
+One interesting discovery: trimmer shafts. They're incredibly cheap, strong enough for the roller bearings, and conveniently 8mm in diameter.
+
+A huge amount of time went into printing. I think the next dev log will be after I'm done with my thesis. If you want to see what I'm up to in the meantime, you can follow my Telegram channel.
+
+Thanks for your attention. **The work doesn't stop.**
+
+<Have a good night>
