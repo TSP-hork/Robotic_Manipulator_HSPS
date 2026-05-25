@@ -641,3 +641,27 @@ A huge amount of time went into printing. I think the next dev log will be after
 Thanks for your attention. **The work doesn't stop.**
 
 <Have a good night>
+
+# 2026-03-12: First axis assembled (almost)
+
+## Milestone
+*   **Assembling:** First axis assembly is almost complete.
+*   **Base:** Finished the epoxy granite base and uploaded the casting guide.
+
+## Current Status
+-   **Assembling:** 2 reducers and the rotary support are fully assembled. Currently trying to screw on the clevis mount.
+-   **Base:** hmm... what did I do... forgot..
+
+## Next Steps
+-   **Assembling:** Assemble the second axis.
+-   **CAD:** Continue assembling all the parts of the robot and polish the fit of each piece.
+
+## Comment
+
+I made the base out of epoxy granite, and it felt like doing stonemason work all day. My room looks like a dump again. I have a ton of parts laying around, I need to assemble them, buy more embedded screws, aaaaand!!! that's it. 
+
+It took a lot of time to build the two reducers, but thankfully they work on the first try! Maybe not perfectly yet, but they work. 
+
+Just a few last steps and the robot will come alive in this very, very positive world... I think its first words will be "why me".
+
+First commit that's not at 4 AM... huh.. <Have a good day guys!>
