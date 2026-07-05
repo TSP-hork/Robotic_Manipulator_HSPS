@@ -665,3 +665,44 @@ It took a lot of time to build the two reducers, but thankfully they work on the
 Just a few last steps and the robot will come alive in this very, very positive world... I think its first words will be "why me".
 
 First commit that's not at 4 AM... huh.. <Have a good day guys!>
+
+
+# 2026-05-07: That was a long way
+
+## Milestone
+*   **Assembling:** Second axis assembled and tested.
+*   **CAD:** Developed encoder holders for the first 3 real axes.
+
+## Current Status
+-   **Assembling:** Reducers for the 2nd and 3rd axes are assembled. The 2nd axis was successfully tested with a 10kg load (or 25Nm) and is now fully assembled.
+-   **CAD:** Finished the design of the 3 encoder holders for axes 1, 2, and 3.
+
+## Next Steps
+-   **Assembling:** Assemble the final axis.
+-   **CAD / CNC:** Start developing the 500W CNC module.
+-   **Firmware:** Start developing the main control loop and inverse kinematics.
+
+## Comment
+
+That was an interesting experience. Really. This past year was hard. The milestone idea for this project was born last May, and looking back at it now, I just think: "Is a whole year really gone?.." And the robot still isn't finished. It's a little sad, and my ego is slightly hurt, but let's look at the bigger picture.
+
+What did I have when this story started (and it's not over in this moment :) )? 
+
+Last year, all I knew was that the LM358 is a good chip... and that's it. You want to ask about mechanics? Good question... nothing. I knew nothing about mechanics. Maybe code? Again, no. Just 4 Arduino lessons, and honestly, I didn't understand a single word of the code when I started.
+
+I just said: "I'm going to build a robot, and to hell with the difficulties, I'll make it anyway!" 
+
+Why did I say that? <I don't know if you're asking this, but I'll answer anyway -^-> 
+Because everyone tells you "it's just a diploma," "it's just university," "maybe you can do it, maybe you can't, it doesn't matter." But I saw how others are building this world, and they aren't building the world I want to live in. Maybe those are big words for me, but it's true. Along the way, I just focused on giving it everything I could. Maybe it won't work in the future, maybe I'll stop the project, but this is my answer to everyone who thought I couldn't do what I wanted. 
+
+Why this monologue? To say this: If you think you can't do something, remember me. Tell yourself: "If this guy could do all of this from scratch, I can do whatever I believe in." 
+
+If you don't want to do something, that's normal. I wouldn't do anything either, but I have a paranoid head and I just go out of my mind if I stop working :>
+
+Now, I am a Lead Embedded Engineer (it's my third day!), and this month I won't be able to physically assemble the robot, but I plan to start on the main loop and inverse kinematics and upload them to Git.
+
+Sorry for the 2 months of silence. I had to chill and write my diploma. I already defended it, and next week I'm just going to pick it up! Then I can finally say I'm done with university. And now I work in the capital of my country.
+
+That was an incredible experience. I just hope the world doesn't end in the next year so I can finish my robot and you can watch this development! 
+
+<Have a hell of a good day!>
