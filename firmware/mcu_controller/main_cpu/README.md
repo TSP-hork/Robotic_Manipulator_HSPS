@@ -25,9 +25,9 @@ and exactly one reason to change.
 The final system will implement a real-time cascade:
 
 ```
-Trajectory (100 Hz)                             ← planned
-    → Kinematics (100 Hz)                       ← planned
-        → Servo loop (1 kHz)                    ← planned
+Trajectory (100 Hz)                             ← logic done (not integrated)
+    → Kinematics (100 Hz)                       ← positioner done, wrist skeleton
+        → Servo loop (1 kHz)                    ← logic done (not integrated)
             → FOC current loop (20 kHz)         ← IMPLEMENTED
                 → PWM output (via FPGA)         ← IMPLEMENTED
 ```
@@ -38,8 +38,12 @@ Kinematics does not know about PWM registers.
 
 ## Current State
 
-The FOC current control layer is fully operational. All higher cascade levels
-(servo, kinematics, trajectory, runtime) are planned but not yet implemented.
+The FOC current control layer is fully operational on hardware. The higher
+cascade levels are being built bottom-up as portable, desktop-testable logic:
+the servo loop, the trajectory planner, and the 3-axis kinematics positioner
+are written and validated but not yet wired into the running cascade. The wrist
+(orientation) kinematics, runtime state machine, and safety guardian remain to
+be done.
 
 **What works today:**
 - Field-Oriented Control with Clarke/Park transforms
@@ -50,15 +54,21 @@ The FOC current control layer is fully operational. All higher cascade levels
 - 280 MHz clock configuration (HSE bypass + PLL)
 - DMA-driven SPI slave with EXTI interrupt
 
+**Logic written & validated (portable, desktop-tested, not yet integrated):**
+- Position/velocity servo loop with feed-forward
+- Jerk-limited S-curve trajectory planning + multi-axis interpolator
+- Forward kinematics (general, any axis count) + 3-axis closed-form inverse
+- Geometric Jacobian and manipulability (singularity) measure
+- Software FPU sin/cos provider (swappable backend)
+
 **What is planned:**
-- Position/velocity servo loop with compile-time extensions
-- Forward/inverse kinematics
-- Trajectory planning with S-curve profiles
+- Servo loop compile-time extensions (damping, friction, …)
+- Wrist / orientation inverse kinematics (4/5/6-axis, skeleton in place)
+- Cascade integration (trajectory → kinematics → servo → FOC)
 - State machine and operating modes
 - Technologist module communication protocol
 - Safety guardian (last barrier before hardware)
-- Hardware CORDIC acceleration for sin/cos
-- Desktop unit testing of logic layer
+- Hardware CORDIC acceleration for sin/cos (needs a CORDIC-equipped MCU)
 
 
 ## Directory Structure
@@ -76,26 +86,23 @@ main_cpu/
 │   │   ├── clarke_park.hpp
 │   │   └── svpwm.hpp
 │   │
-│   ├── 1_servo/                        # (planned) Position/velocity servo loop
-│   │   ├── servo.hpp
-│   │   ├── servo.cpp
-│   │   ├── servo_chain.hpp             # Compile-time extension pipeline
-│   │   └── extensions/                 # Servo loop extensions (∞)
+│   ├── 1_servo/                        # Position/velocity servo — IMPLEMENTED
+│   │   ├── servo.c / .h                # Cascade P-pos + PI-vel, with feed-forward
+│   │   └── extensions/                 # (planned) Servo loop extensions (∞)
 │   │       ├── damping/
 │   │       │   └── damping.hpp
 │   │       ├── friction/
 │   │       │   └── friction.hpp
 │   │       └── .../
 │   │
-│   ├── 2_kinematics/                   # (planned) Forward/inverse kinematics
-│   │   ├── forward.cpp
-│   │   ├── inverse.cpp
-│   │   └── jacobian.cpp
+│   ├── 2_kinematics/                   # Forward/inverse kinematics — IMPLEMENTED (logic only)
+│   │   ├── kinematics.c / .h           # Façade + core: general FK, IK dispatch, Jacobian
+│   │   ├── seg_position3.c / .h        # Closed-form 3-axis positioner (base + shoulder + elbow)
+│   │   └── seg_wrist3.c / .h           # (skeleton) 1/2/3-DOF wrist for 4/5/6-axis arms
 │   │
-│   ├── 3_trajectory/                   # (planned) Path planning
-│   │   ├── planner.cpp
-│   │   ├── interpolator.cpp
-│   │   └── s_curve.cpp
+│   ├── 3_trajectory/                   # Path planning — IMPLEMENTED (logic only)
+│   │   ├── s_curve.c / .h              # Jerk-limited 7-segment S-curve profile
+│   │   └── interpolator.c / .h         # Multi-axis sync + waypoint sequencing
 │   │
 │   ├── 4_runtime/                      # (planned) System orchestration
 │   │   ├── state_machine.cpp
@@ -146,6 +153,8 @@ main_cpu/
 │       ├── STM32H7A3ZITXQ_FLASH.ld    # Linker script
 │       └── startup_stm32h7a3xx.s       # Vector table + reset handler
 │
+├── tests/                              # Desktop unit tests (NOT built into firmware)
+│   └── test_trajectory.c               # Host-compiled tests for 3_trajectory/
 ├── main.cpp                            # Entry point + configuration
 ├── CMakeLists.txt                      # Build system (ARM cross-compilation)
 └── Makefile                            # Convenience wrapper (config/build/flash)
@@ -173,9 +182,9 @@ cascade level. Lower number = faster loop = closer to hardware.
 
 ```
 0_foc        20 kHz    current control          ← IMPLEMENTED (as foc.c)
-1_servo       1 kHz    position/velocity        ← planned
-2_kinematics  100 Hz   joint-to-cartesian       ← planned
-3_trajectory  100 Hz   path planning            ← planned
+1_servo       1 kHz    position/velocity        ← logic done, not integrated
+2_kinematics  100 Hz   joint-to-cartesian       ← positioner done, wrist skeleton
+3_trajectory  100 Hz   path planning            ← logic done, not integrated
 4_runtime     main()   state machine, commands  ← planned
 ```
 
@@ -616,19 +625,26 @@ make clean
 | SPI packet structures    | ✅ Working   | `3_abstract/types.h`  |
 | hw_impl.h (SPI access)   | ✅ Working   | `4_driver/hw_impl.h`  |
 | hw_impl.h (direct HW)    | 🔲 Stub     | `4_driver/hw_impl.h`   |
-| hw_contract.h            | 🔲 Planned  | `3_abstract/`          |
-| Position servo loop      | 🔲 Planned  | `1_servo/`             |
-| Velocity control         | 🔲 Planned  | `1_servo/`             |
+| hw_contract.h            | ✅ Working   | `3_abstract/`          |
+| Position servo loop      | ✅ Working   | `1_servo/servo.c`      |
+| Velocity control         | ✅ Working   | `1_servo/servo.c`      |
+| Servo→FOC integration    | 🔲 Planned  | (caller wires it)      |
 | Servo extensions         | 🔲 Planned  | `1_servo/extensions/`  |
+| hw_sincos (software FPU) | ✅ Working   | `4_driver/.../sincos/` |
 | Safety guardian          | 🔲 Planned  | `safety/`              |
-| Forward kinematics       | 🔲 Planned  | `2_kinematics/`        |
-| Inverse kinematics       | 🔲 Planned  | `2_kinematics/`        |
-| Trajectory planning      | 🔲 Planned  | `3_trajectory/`        |
+| Forward kinematics (DH)  | ✅ Working   | `2_kinematics/kinematics.c`   |
+| Inverse kin. (3-axis)    | ✅ Working   | `2_kinematics/seg_position3.c`|
+| Jacobian + manipulability| ✅ Working   | `2_kinematics/kinematics.c`   |
+| Wrist / orientation IK   | 🔲 Skeleton | `2_kinematics/seg_wrist3.c`   |
+| Kinematics (servo hookup)| 🔲 Planned  | (caller wires it)      |
+| Jerk-limited S-curve     | ✅ Working   | `3_trajectory/s_curve.c`     |
+| Multi-axis interpolator  | ✅ Working   | `3_trajectory/interpolator.c`|
+| Trajectory (servo hookup)| 🔲 Planned  | `1_servo/` (consumer)  |
 | State machine            | 🔲 Planned  | `4_runtime/`           |
 | Technologist protocol    | 🔲 Planned  | `4_runtime/protocol/`  |
 | Hardware CORDIC          | 🔲 Planned  | `4_driver/`            |
 | Library blocks           | 🔲 Planned  | `2_utility/`           |
-| Desktop unit testing     | 🔲 Planned  | —                      |
+| Desktop unit testing     | ✅ Working   | `tests/`               |
 
 ---
 
@@ -656,13 +672,13 @@ main.cpp          ────────────────────�
 logic/4_runtime/  ◄── protocol/ (technologist)      │  ← planned
   │ commands                                        │
   ▼                                                 │
-logic/3_trajectory/                                 │  ← planned
+logic/3_trajectory/                                 │  ← logic done
   │ waypoints                                       │
   ▼                                                 │
-logic/2_kinematics/                                 │  ← planned
+logic/2_kinematics/                                 │  ← positioner done
   │ joint angles                                    │
   ▼                                                 │
-logic/1_servo/    ◄── extensions/ (compile-time)    │  ← planned
+logic/1_servo/    ◄── extensions/ (compile-time)    │  ← logic done
   │ torque         │                                │
   │                ▼                                │
   │            safety/guardian  ← ALWAYS ON          │  ← planned

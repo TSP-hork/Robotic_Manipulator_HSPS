@@ -667,7 +667,7 @@ Just a few last steps and the robot will come alive in this very, very positive 
 First commit that's not at 4 AM... huh.. <Have a good day guys!>
 
 
-# 2026-05-07: That was a long way
+# 2026-07-05: That was a long way
 
 ## Milestone
 *   **Assembling:** Second axis assembled and tested.
@@ -706,3 +706,22 @@ Sorry for the 2 months of silence. I had to chill and write my diploma. I alread
 That was an incredible experience. I just hope the world doesn't end in the next year so I can finish my robot and you can watch this development! 
 
 <Have a hell of a good day!>
+
+# 2026-07-12: free weekend
+
+## Milestone
+*   **Firmware:** Wrote the main part of the upper control loop.
+
+## Current Status
+-   **Firmware:** I now have the main part of the upper loop: inverse kinematics, the servo code, the trajectory planner, and hardware sin/cos on the FPU. It's written and the math checks out, but it isn't compiled or wired into the running cascade yet.
+
+## Next Steps
+-   **Firmware:** Test it and finish the whole upper control loop.
+-   **Assembling:** Assemble the final axis.
+-   **CAD / CNC:** Start developing the 500W CNC module.
+
+## Comment
+
+Keep developing, keep working!
+
+and <Havee a goood niiight :> >
