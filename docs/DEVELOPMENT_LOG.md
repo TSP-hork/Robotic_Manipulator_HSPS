@@ -725,3 +725,23 @@ That was an incredible experience. I just hope the world doesn't end in the next
 Keep developing, keep working!
 
 and <Havee a goood niiight :> >
+
+# 2026-08-02: Work, hard work
+
+## Milestone
+*   **CAD / CNC:** Selected an 800W spindle and created a CAD model for the adapter.
+
+## Current Status
+-   **CAD / CNC:** Upgraded the spindle choice for the CNC module to 800W (up from 500W). Found a blueprint for the spindle holder and designed the CAD model for the adapter.
+
+## Next Steps
+-   **Firmware:** Test it and finish the entire upper control loop.
+-   **Assembling:** Assemble the final axis.
+-   **CNC Hardware:** Choose an MCU (microcontroller) to control the spindle and communicate with the robot. Select a motor driver for it.
+-   **CNC Firmware:** Order the remaining parts for the CNC system and write the control/communication code to interface with the robot.
+
+## Comment
+
+Because of work, I can't go home to grab my robot, and I have to work all week. I really hope this first adjustment phase and the first month of my new job wrap up soon so I can finally get back to thinking about my project. If not, I hope things settle down soon anyway. I like my new job, but the robot and the CNC module remain my top goals. Thanks to everyone who is still following along! :)
+
+And what? Have a... Good... What? <Night!>
