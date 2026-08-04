@@ -737,7 +737,7 @@ and <Havee a goood niiight :> >
 ## Next Steps
 -   **Firmware:** Test it and finish the entire upper control loop.
 -   **Assembling:** Assemble the final axis.
--   **CNC Hardware:** Choose an MCU (microcontroller) to control the spindle and communicate with the robot. Select a motor driver for it.
+-   **CNC Hardware:** Choose an MCU to control the spindle and communicate with the robot. Select a motor driver for it.
 -   **CNC Firmware:** Order the remaining parts for the CNC system and write the control/communication code to interface with the robot.
 
 ## Comment
@@ -745,3 +745,23 @@ and <Havee a goood niiight :> >
 Because of work, I can't go home to grab my robot, and I have to work all week. I really hope this first adjustment phase and the first month of my new job wrap up soon so I can finally get back to thinking about my project. If not, I hope things settle down soon anyway. I like my new job, but the robot and the CNC module remain my top goals. Thanks to everyone who is still following along! :)
 
 And what? Have a... Good... What? <Night!>
+
+# 2026-08-04: Work, hard work *upd!*
+
+## Milestone
+*   **CNC Hardware:** Selected the CNC kit and an ESP32-S3 for the CNC module.
+
+## Current Status
+-   **CAD / CNC:** I selected a kit from AliExpress with a pump, VFD, spindle, and spindle holder (around $100), as well as the MCU. The MCU is an ESP32-S3-N16R8, and I chose a TTL-to-RS485 module for communication.
+
+## Next Steps
+-   **Firmware:** Test it and finish the entire upper control loop.
+-   **Assembling:** Assemble the final axis.
+~~- CNC Hardware: Choose an MCU to control the spindle and communicate with the robot. Select a motor driver for it.~~
+-   **CNC Firmware:** Order the remaining parts for the CNC system and write the control/communication code to interface with the robot.
+
+## Comment
+
+Trying out a quick style update for the dev log, as I didn't want to create a whole new file with a long title just for a short text.
+
+<Have a good night> I'll order everything once I get paid!... though it'll take about a month to get here... yee....
